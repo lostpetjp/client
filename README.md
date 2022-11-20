@@ -1,6 +1,10 @@
 # client
 LOSTPET.JP (迷子ペットのデータベース)のJavaScriptを管理するリポジトリ。
 
+## 方針
+- SPAとSSRを実現する。
+- 必要最低限のファイル(css、js)を、適切に読み込む。
+
 ## Typescript
 ### 追記までは過去の話
 Typescriptでの開発を下記の理由で断念した。
@@ -44,12 +48,15 @@ class A {
 ```typescript
 type On = () => void
 
-class A {
+class A extends Common {
   hoge() {
     // 運用上、必ずメソッドなのでasでヒントを与える
     (this.on as On)();
   }
+}
 
+// 全てのファイルに含まれていてもサイズを圧迫しない
+class Common {
   on?: On
 }
 
@@ -57,4 +64,16 @@ class A {
 Object.setPropertyOf(A.prototype, {
   on: () => {},
 });
+```
+
+### さらに追記
+下記の記法の存在を知り、さらに自然に記述することが可能になった。
+
+```typescript
+class A extends Common {
+  hoge() {
+    // (this.on as On)();
+    this.on!();
+  }
+}
 ```
