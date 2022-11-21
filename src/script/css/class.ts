@@ -35,6 +35,10 @@ type BuildCSSTextMap = {
   [key in StyleType]?: string
 }
 
+type AttachOptions = {
+  build?: boolean
+}
+
 export class CSS extends Component {
   private promises: PromiseMap = {}
   private caches: CacheMap = {}
@@ -49,61 +53,73 @@ export class CSS extends Component {
     document.head.appendChild(this.element);
   }
 
-  load(id: StyleId): Promise<void> {
-    if (this.caches[id]) return Promise.resolve();
+  load(ids: StyleId | StyleIdList): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!Array.isArray(ids)) ids = [ids];
 
-    const promises = this.promises;
-    const promise = promises[id];
-    if (promise) return promise;
+      Promise.all(ids.map((id) => {
+        if (!this.caches[id]) {
+          const promises = this.promises;
+          const promise = promises[id];
 
-    return promises[id] = new Promise((resolve, reject) => {
-      fetch("/styles/" + id + ".css?v=" + this.window!.version)
-        .then((res) => res.text())
-        .then((cssText) => {
-          if (this.S) {
-            let type: StyleType = "global";
+          return promise ? promise : (promises[id] = new Promise((resolve, reject) => {
+            fetch("/styles/" + id + ".css?v=" + this.window!.version)
+              .then((res) => res.text())
+              .then((cssText) => {
+                if (this.S) {
+                  let type: StyleType = "global";
 
-            if ("@" === cssText[0]) {
-              const char35 = cssText.slice(0, 35);
+                  if ("@" === cssText[0]) {
+                    const char35 = cssText.slice(0, 35);
 
-              let position;
+                    let position;
 
-              // hover
-              if (char35[8]) { // "h"
-                type = "hover";
-                position = [21, -1,];
+                    // hover
+                    if (char35[8]) { // "h"
+                      type = "hover";
+                      position = [21, -1,];
 
-              } else {
-                const size = parseInt(char35.slice(-6), 10);
+                    } else {
+                      const size = parseInt(char35.slice(-6), 10);
 
-                switch (size) {
-                  case 360:
-                  case 480:
-                  case 768:
-                    position = [36, -1,];
-                    break;
+                      switch (size) {
+                        case 360:
+                        case 480:
+                        case 768:
+                          position = [36, -1,];
+                          break;
 
-                  default:
-                    // case 1024:
-                    position = [37, -1,];
-                    break;
+                        default:
+                          // case 1024:
+                          position = [37, -1,];
+                          break;
+                      }
+
+                      type = (("i" === char35[20] ? "min" : "max") + size) as StyleType;
+                    }
+
+                    cssText.slice(...position);
+                  }
+
+                  this.caches[id] = {
+                    id: id,
+                    text: cssText,
+                    type: type,
+                  };
                 }
 
-                type = (("i" === char35[20] ? "min" : "max") + size) as StyleType;
-              }
-
-              cssText.slice(...position);
-            }
-
-            this.caches[id] = {
-              id: id,
-              text: cssText,
-              type: type,
-            };
-          }
-
-          resolve();
-        })
+                resolve();
+              })
+              .catch(reject)
+              .finally(() => {
+                if (this.S) {
+                  this.promises[id] = undefined;
+                }
+              });
+          }));
+        }
+      }))
+        .then(() => resolve())
         .catch((err) => {
           if (this.S) {
             console.error(err);
@@ -112,15 +128,10 @@ export class CSS extends Component {
 
           reject();
         })
-        .finally(() => {
-          if (this.S) {
-            this.promises[id] = undefined;
-          }
-        });
     });
   }
 
-  attach(source: Component, ids: StyleIdList): void {
+  attach(source: Component, ids: StyleId | StyleIdList, options: AttachOptions | null = null): void {
     if (!Array.isArray(ids)) ids = [ids];
 
     let hasChange = false;
@@ -145,7 +156,7 @@ export class CSS extends Component {
       hasChange = true;
     });
 
-    if (hasChange) this.build();
+    if (hasChange && (!options || false !== options.build)) this.build();
   }
 
   build(): void {
@@ -188,7 +199,7 @@ export class CSS extends Component {
     if (styleE.textContent !== allCSSText) styleE.innerHTML = allCSSText;
   }
 
-  update(): void {
+  update(options: AttachOptions | null = null): void {
     const now = Date.now();
     let requireBuild = false;
 
@@ -208,7 +219,7 @@ export class CSS extends Component {
       return true;
     });
 
-    if (requireBuild) this.build();
+    if (requireBuild && (!options || false !== options.build)) this.build();
   }
 }
 
