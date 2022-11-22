@@ -51,6 +51,19 @@ export class CSS extends Component {
     });
 
     document.head.appendChild(this.element);
+
+    const changeListener: EventListener = () => this.build();
+
+    [
+      "360",
+      "480",
+      "768",
+      "1024",
+    ].forEach((size) => {
+      matchMedia("screen and (min-width:" + size + "px)").addEventListener("change", changeListener, {
+        passive: true,
+      });
+    });
   }
 
   load(ids: StyleId | StyleIdList): Promise<void> {
@@ -75,7 +88,7 @@ export class CSS extends Component {
                     let position;
 
                     // hover
-                    if (char35[8]) { // "h"
+                    if ("h" === char35[8]) { // "h"
                       type = "hover";
                       position = [21, -1,];
 
@@ -98,7 +111,7 @@ export class CSS extends Component {
                       type = (("i" === char35[20] ? "min" : "max") + size) as StyleType;
                     }
 
-                    cssText.slice(...position);
+                    cssText = cssText.slice(...position);
                   }
 
                   this.caches[id] = {
@@ -156,7 +169,7 @@ export class CSS extends Component {
       hasChange = true;
     });
 
-    if (hasChange && (!options || false !== options.build)) this.build();
+    if (hasChange && (options && true === options.build)) this.build();
   }
 
   build(): void {
@@ -196,7 +209,11 @@ export class CSS extends Component {
       }
     }
 
-    if (styleE.textContent !== allCSSText) styleE.innerHTML = allCSSText;
+    if (styleE.textContent !== allCSSText) {
+      styleE.innerHTML = allCSSText;
+    } else {
+      console.log("skip");
+    }
   }
 
   update(options: AttachOptions | null = null): void {
@@ -219,7 +236,7 @@ export class CSS extends Component {
       return true;
     });
 
-    if (requireBuild && (!options || false !== options.build)) this.build();
+    if (requireBuild && (options && true === options.build)) this.build();
   }
 }
 
