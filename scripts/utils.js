@@ -11,7 +11,7 @@ exports.buildJs = async (options) => {
 
   tokens.pop(); // basename
 
-  console.log(options);
+  // console.log(options);
 
   const id = tokens.pop();
   const dist = ("script" === id ? "/script" : `/scripts/${id}`) + (minify ? ".min" : "") + ".js";
@@ -30,11 +30,15 @@ exports.buildJs = async (options) => {
         renderChunk(code) {
           const result = uglify.minify(code, {
             sourceMap: true,
+            compress: {
+              passes: 10,
+            },
             output: {
               comments: /^!/,
             },
             toplevel: true,
             mangle: {
+              reserved: "script" === id ? ["a"] : [],
               properties: {
                 regex: /^_/,
               },
