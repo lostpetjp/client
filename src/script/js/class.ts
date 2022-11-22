@@ -4,7 +4,9 @@ type CacheMap = {
   [key: string]: any
 }
 
-type ScriptId = number
+export type ScriptId = number
+
+export type ScriptIdList = Array<ScriptId>
 
 type Script = any;
 
@@ -26,7 +28,7 @@ export class JS extends Component {
       if (this.caches[id]) {
         resolve(this.caches[id]);
       } else {
-        import("/scripts/" + id + ".js")
+        import("/scripts/" + id + ".js?v=" + this.window!.version)
           .then((module) => {
             const moduleDefault = module.default;
             const promises: Array<any> = [moduleDefault,];
