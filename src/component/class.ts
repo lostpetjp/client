@@ -19,8 +19,6 @@ export class Component {
   off?: Off
   emit?: Emit
   destroy?: Destroy
-
-  plugins?: PluginList
 }
 
 export type Status = boolean
@@ -36,14 +34,12 @@ export type ComponentList = Array<Component>
 export type TimeoutIdMap = { [key: number | string]: string | number | undefined }
 
 export type EventName = string
-export type PluginList = Array<ExtendsTarget> | undefined
 
 // 拡張対象のコンストラクタ
 export type ExtendsTarget = {
   prototype: {
     [key: string]: any
   }
-  plugins?: PluginList
 }
 export type InitOptions = {
   on?: InitEventListeners
