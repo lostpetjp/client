@@ -8,7 +8,7 @@ import { ElementJSON } from "../element";
 import { ScriptId, ScriptIdList } from "../js";
 
 export type DocumentOptions = InitOptions & {
-
+  data?: DocumentData
 }
 
 export type TemplateId = number
@@ -45,7 +45,25 @@ export type DocumentData = {
 }
 
 type DocumentInitOptions = InitOptions & {
-  data: DocumentData
+}
+
+/**
+ * 1: a要素をclick
+ * 2: popstate
+ * 3: SSR
+ */
+export type LoadType = 1 | 2 | 3;
+
+export type DocumentLoadOptions = {
+  data?: DocumentData
+  type: number
+  scroll?: ScrollToOptions
+}
+
+type DocumentPreloadOptions = {
+  pathname?: string
+  search?: string
+  data?: DocumentData
 }
 
 /**
@@ -55,7 +73,6 @@ export class DocumentM extends Component {
   mode: Mode = 2
   template?: Template
   private item?: DocumentItem
-  data?: DocumentData
 
   static caches: Caches = {}
 
@@ -65,34 +82,105 @@ export class DocumentM extends Component {
   nav?: HTMLElement
   footer?: HTMLElement
 
-  clickEventListener: EventListener = (event: Event) => {
-    event.preventDefault();
-
+  private readonly clickEventListener: EventListener = (event: Event) => {
     const aE = event.currentTarget as HTMLAnchorElement;
 
-    if (location.pathname !== aE.pathname || location.search !== aE.search) {
-      history.pushState(history.state, document.title, aE.pathname + aE.search);
-      this.load();
+    const isSamePage = location.pathname === aE.pathname && location.search === aE.search;
+    const isHashChangeOnly = isSamePage && location.hash !== aE.hash;
+
+    if (!isHashChangeOnly) {
+      event.preventDefault();
+
+      if (!isSamePage || scrollY) {
+        history.pushState(history.state, document.title, aE.pathname + aE.search + aE.hash);
+
+        const scrollOptions = {
+          left: 0,
+          top: 0,
+        };
+
+        if (!isSamePage) {
+          this.load({
+            scroll: scrollOptions,
+            type: 1,
+          });
+        } else {
+          scrollTo(scrollOptions);
+        }
+      }
+    }
+  }
+
+  private readonly mouseoverEventListener: EventListener = (event: Event) => {
+    const aE = event.currentTarget as HTMLAnchorElement;
+    const pathname = aE.pathname;
+    const search = aE.search;
+
+    if (!DocumentM.caches[pathname + search]) {
+      this.preload({
+        pathname: pathname,
+        search: search,
+      });
     }
   }
 
   constructor(options: DocumentInitOptions) {
     const children = document.body.childNodes;
+    const headerE = children[0];
     const bodyE = children[1];
     const bodyChildren = bodyE.childNodes;
+    const navE = bodyChildren[1];
+    const footerE = children[2];
 
     super({
       P: options.P,
-      data: options.data,
       header: children[0],
       body: bodyE,
       main: bodyChildren[0],
       nav: bodyChildren[1],
       footer: children[2],
     });
+
+    [
+      headerE,
+      navE,
+      footerE,
+    ].forEach((rootE) => this.attach(rootE as HTMLElement));
   }
 
-  load(): void {
+  preload(options: DocumentPreloadOptions): Promise<DocumentData> {
+    return new Promise((resolve, reject) => {
+      (options.data ? Promise.resolve(options.data) : this.getInfo(options.pathname!, options.search!))
+        .then((data) => {
+          const win = this.window!;
+
+          if (this.S) {
+            const templateData = data.template;
+            const contentData = data.content;
+
+            return Promise.all([
+              data,
+              ...Array.from(new Set([...templateData.css, ...contentData.css])).map((id) => win.css!.load(id)),
+              ...[templateData.component, contentData.component, ...templateData.js, ...contentData.js].map((id) => win.js!.load(id)),
+            ]);
+          }
+        })
+        .then((res) => {
+          if (this.S) {
+            resolve(res![0]);
+          }
+        })
+        .catch((err) => {
+          if (this.S) {
+            console.error(err);
+            this.window!.throw();
+          }
+        })
+        .finally(reject);
+    });
+  }
+
+  load(options: DocumentLoadOptions): void {
     const oldDocument = this.item;
 
     let oldSearch = null;
@@ -113,6 +201,7 @@ export class DocumentM extends Component {
 
       this.item = new DocumentItem({
         P: this,
+        ...options,
       }, newPathname, newSearch);
     }
   }
@@ -139,6 +228,7 @@ export class DocumentM extends Component {
           if (res.status) {
             const data = res.body;
             DocumentM.caches[cacheKey] = data;
+
             resolve(data);
           }
 
@@ -149,6 +239,8 @@ export class DocumentM extends Component {
   }
 
   attach(rootE: HTMLElement = document.body) {
+    const canHover = matchMedia("(hover:hover)").matches;
+
     // a要素にイベントを設定
     for (let i = 0, a = rootE.getElementsByTagName("a"); a.length > i; i++) {
       let aE = a[i];
@@ -156,6 +248,13 @@ export class DocumentM extends Component {
       aE.addEventListener("click", this.clickEventListener, {
         passive: false,
       });
+
+      if (canHover && !DocumentM.caches[aE.pathname + aE.search]) {
+        aE.addEventListener("mouseover", this.mouseoverEventListener, {
+          once: true,
+          passive: true,
+        });
+      }
     }
   }
 }
@@ -165,6 +264,7 @@ export class DocumentItem extends Component {
   content?: Content
   pathname: string = ""
   search: string = ""
+  scroll?: ScrollOptions
 
   P?: DocumentM
 
@@ -174,10 +274,17 @@ export class DocumentItem extends Component {
     super({
       P: documentM,
       pathname: newPathname,
+      scroll: options.scroll,
       search: newSearch,
     });
 
-    (2 === documentM.mode ? Promise.resolve(documentM.data!) : documentM.getInfo(newPathname, newSearch))
+    //(2 === documentM.mode ? Promise.resolve(options.data!) : documentM.getInfo(newPathname, newSearch))
+    documentM.preload(2 === documentM.mode ? {
+      data: options.data,
+    } : {
+      pathname: newPathname,
+      search: newSearch,
+    })
       .then((data) => {
         const win = this.window!;
 
@@ -323,6 +430,11 @@ export class DocumentItem extends Component {
             template.readyState = 4;
           }
 
+          // scroll position
+          if (this.scroll) {
+            scrollTo(this.scroll);
+          }
+
           // update location
           history.replaceState(history.state, document.title, "https://" + location.hostname + data.pathname + data.search);
 
@@ -350,10 +462,14 @@ export class DocumentItem extends Component {
 
           if (2 === doc.mode) {
             doc.mode = 1;
-            doc.data = undefined;
           }
         }
+      })
+      .catch((err) => {
+        if (this.S) {
+          console.error(err);
+          this.window!.throw();
+        }
       });
-
   }
 }
