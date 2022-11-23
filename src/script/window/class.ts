@@ -36,19 +36,32 @@ export class Win extends Component {
       this.factory.create(constructor);
     });
 
-    this.css = new CSS({ P: this, });
+    this.css = new CSS({ P: this, default: options.css });
     this.me = new Me({ P: this, });
     this.js = new JS({ P: this, });
-    this.document = new DocumentM({ P: this, data: options.document });
+    this.document = new DocumentM({ P: this });
 
     this.element = new Json2Node;
+
+    // for popstate
+    addEventListener("popstate", (event) => {
+      event.preventDefault();
+
+      this.document!.load({
+        type: 2,
+      });
+    }, {
+      passive: false,
+    })
+
+    this.css!.attach(this, [3, 4, 5, 6, 10, 11, 12, 13, 14,]);
 
     // for color-scheme
     matchMedia("(prefers-color-scheme:dark)").addEventListener("change", (event) => {
       const colorMode = localStorage.getItem("t");
       var isDark = "2" === colorMode || ("1" !== colorMode && event.matches);
       document.documentElement.classList.replace(isDark ? "t1" : "t2", isDark ? "t2" : "t1");
-      // this.emit!("colorschemechange");  // 必要があれば
+      this.css!.build();
     });
 
     // for resize
@@ -68,7 +81,10 @@ export class Win extends Component {
       removeEventListener("resize", resizeListener);
     });
 
-    this.document.load();
+    this.document.load({
+      data: options.document,
+      type: 3,
+    });
   }
 
   fetch(options: FetchOptions): Promise<{ [key: string]: any }> {
