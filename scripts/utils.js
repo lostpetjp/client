@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const rollup = require('rollup').rollup;
 const esbuild = require('rollup-plugin-esbuild').default;
@@ -14,7 +15,8 @@ exports.buildJs = async (options) => {
   // console.log(options);
 
   const id = tokens.pop();
-  const dist = ("script" === id ? "/script" : `/scripts/${id}`) + (minify ? ".min" : "") + ".js";
+  const src = options.src;
+  const dist = "dist" + ("script" === id ? "/script" : `/scripts/${id}`) + (minify ? ".min" : "") + ".js";
 
   await (await rollup({
     input: options.src,
@@ -56,7 +58,7 @@ exports.buildJs = async (options) => {
   })).write({
     ...{
       banner: `/*! lostpetjp | MIT | https://lostpet.jp/ */`,
-      file: `dist${dist}`,
+      file: `${dist}`,
       //format: "cjs",
       //name: "test",
       // sourcemap: options.sourcemap,
@@ -65,4 +67,20 @@ exports.buildJs = async (options) => {
     //  exports: options.exports,
     //} : {})
   });
+
+  // 環境変数の変換
+  const convertPath = path.dirname(src) + "/.build/convert.json";
+
+  if (fs.existsSync(convertPath)) {
+    let fileText = fs.readFileSync(dist, "utf8");
+
+    const buildJson = JSON.parse(fs.readFileSync(convertPath, "utf8"));
+
+    for (let key in buildJson) {
+      fileText = fileText.replace(new RegExp("\\$\\{\\{" + key + "\\}\\}", "g"), buildJson[key]);
+    }
+
+    fs.writeFileSync(dist, fileText);
+  }
+
 };
