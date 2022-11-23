@@ -6,14 +6,20 @@ export type StyleIdList = Array<StyleId>
 type CSSText = string
 
 type CacheMap = {
-  [key: string]: StyleEntry
+  [key: string]: CacheEntry
+}
+
+type CacheEntry = {
+  id: StyleId
+  styles: StyleEntryList
 }
 
 type StyleEntry = {
-  id: StyleId
   text: CSSText
   type: StyleType
 }
+
+type StyleEntryList = Array<StyleEntry>
 
 type MinSize = "360" | "480" | "768" | "1024"
 type MinToken = `min${MinSize}`
@@ -74,11 +80,17 @@ export class CSS extends Component {
       const id = entry.id;
       const type = entry.type;
 
-      this.caches[id] = {
-        id: id,
+      if (!this.caches[id]) {
+        this.caches[id] = {
+          id: id,
+          styles: [],
+        };
+      }
+
+      this.caches[id].styles.push({
         text: cssText!.slice(start, end),
         type: type,
-      };
+      });
     });
 
     [
@@ -99,6 +111,11 @@ export class CSS extends Component {
 
       Promise.all(ids.map((id) => {
         if (!this.caches[id]) {
+          this.caches[id] = {
+            id: id,
+            styles: [],
+          };
+
           const promises = this.promises;
           const promise = promises[id];
 
@@ -107,68 +124,102 @@ export class CSS extends Component {
               .then((res) => res.text())
               .then((cssText) => {
                 if (this.S) {
-                  let type: StyleType = "global";
+                  const blockPositions: Array<number> = [];
 
-                  if ("@" === cssText[0]) {
-                    const char35 = cssText.slice(0, 35);
+                  [
+                    "@media screen and (min-width:360px){",
+                    "@media screen and (min-width:480px){",
+                    "@media screen and (min-width:768px){",
+                    "@media screen and (min-width:1024px){",
+                    "@media (hover:hover) and (prefers-color-scheme:light){",
+                    "@media (hover:hover) and (prefers-color-scheme:dark){",
+                    "@media (prefers-color-scheme:light){",
+                    "@media (prefers-color-scheme:dark){",
+                    "@media (hover:hover){",
+                  ].forEach((prefix: string) => {
+                    const position = cssText.indexOf(prefix);
+                    if (-1 !== position) blockPositions.push(position);
+                  });
 
-                    let position;
+                  blockPositions.sort();
 
-                    if ("h" === char35[8]) {
-                      // @media (hover:hover) and (prefers-color-scheme:light)
-                      let start = 21;
+                  const cssTextList: Array<CSSText> = [];
 
-                      if ("(" === char35[25]) {
+                  if (blockPositions.length) {
+                    if (blockPositions[0]) cssTextList.push(cssText.slice(0, blockPositions[0]));
 
-                        if ("l" === cssText[47]) {
-                          type = "hover:light";
-                          start = 54;
-                        } else {
-                          type = "hover:dark";
-                          start = 53;
-                        }
-                      } else {
-                        type = "hover";
-                      }
-
-                      position = [start, -1,];
-                    } else if ("p" === char35[8]) {
-                      if ("l" === char35[29]) {
-                        type = "light";
-                        position = [36, -1,];
-
-                      } else {
-                        type = "dark";
-                        position = [35, -1,];
-
-                      }
-                    } else {
-                      const size = parseInt(char35.slice(-6), 10);
-
-                      switch (size) {
-                        case 360:
-                        case 480:
-                        case 768:
-                          position = [36, -1,];
-                          break;
-
-                        default:
-                          // case 1024:
-                          position = [37, -1,];
-                          break;
-                      }
-
-                      type = (("i" === char35[20] ? "min" : "max") + size) as StyleType;
-                    }
-
-                    cssText = cssText.slice(...position);
+                    blockPositions.forEach((position, index) => {
+                      const sliceOptions = [position];
+                      if ((1 + index) !== blockPositions.length) sliceOptions.push(blockPositions[1 + index]);
+                      cssTextList.push(cssText.slice(...sliceOptions));
+                    });
+                  } else {
+                    cssTextList.push(cssText);
                   }
 
-                  this.caches[id] = {
-                    id: id,
-                    text: cssText,
-                    type: type,
-                  };
+                  cssTextList.forEach((cssText) => {
+                    let type: StyleType = "global";
+
+                    if ("@" === cssText[0]) {
+                      const char35 = cssText.slice(0, 35);
+
+                      let position;
+
+                      if ("h" === char35[8]) {
+                        // @media (hover:hover) and (prefers-color-scheme:light)
+                        let start = 21;
+
+                        if ("(" === char35[25]) {
+
+                          if ("l" === cssText[47]) {
+                            type = "hover:light";
+                            start = 54;
+                          } else {
+                            type = "hover:dark";
+                            start = 53;
+                          }
+                        } else {
+                          type = "hover";
+                        }
+
+                        position = [start, -1,];
+                      } else if ("p" === char35[8]) {
+                        if ("l" === char35[29]) {
+                          type = "light";
+                          position = [36, -1,];
+
+                        } else {
+                          type = "dark";
+                          position = [35, -1,];
+
+                        }
+                      } else {
+                        const size = parseInt(char35.slice(-6), 10);
+
+                        switch (size) {
+                          case 360:
+                          case 480:
+                          case 768:
+                            position = [36, -1,];
+                            break;
+
+                          default:
+                            // case 1024:
+                            position = [37, -1,];
+                            break;
+                        }
+
+                        type = (("i" === char35[20] ? "min" : "max") + size) as StyleType;
+                      }
+
+                      cssText = cssText.slice(...position);
+                    }
+
+                    this.caches[id].styles.push({
+                      text: cssText,
+                      type: type,
+                    });
+                  });
                 }
 
                 resolve();
@@ -231,9 +282,11 @@ export class CSS extends Component {
       const cacheEntry = this.caches[entry.id];
 
       if (cacheEntry) {
-        const type = cacheEntry.type;
-        if ("string" !== typeof textMap[type]) textMap[type] = "";
-        textMap[type] += cacheEntry.text;
+        cacheEntry.styles.forEach((entry) => {
+          const type = entry.type;
+          if ("string" !== typeof textMap[type]) textMap[type] = "";
+          textMap[type] += entry.text;
+        });
       }
     });
 
@@ -262,9 +315,6 @@ export class CSS extends Component {
         let mediaQuery = entry[1];
 
         if ("boolean" === typeof mediaQuery ? mediaQuery : !(mediaQuery && !matchMedia(mediaQuery).matches)) {
-          // media queryの宣言は必要ない
-          // const isHoverType: boolean = "hover" === type;
-          // allCSSText += (isHoverType ? "@media " + mediaQuery + "{" : "") + cssText + (isHoverType ? "}" : "");
           allCSSText += cssText;
         }
       }
