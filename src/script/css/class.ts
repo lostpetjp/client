@@ -17,7 +17,7 @@ type StyleEntry = {
 
 type MinSize = "360" | "480" | "768" | "1024"
 type MinToken = `min${MinSize}`
-type StyleType = "global" | "hover" | MinToken;
+type StyleType = "global" | "hover" | MinToken | "light" | "dark" | "hover:light" | "hover:dark";
 
 type PromiseMap = {
   [key: string]: Promise<void> | undefined
@@ -39,20 +39,47 @@ type AttachOptions = {
   build?: boolean
 }
 
+type DefaultCSSEntryPosition = [number, number];
+
+type DefaultCSSEntry = {
+  id: StyleId
+  position: DefaultCSSEntryPosition
+  type: StyleType
+}
+
+export type DefaultCSSEntryList = Array<DefaultCSSEntry>
+
+export type CSSOptions = InitOptions & {
+  default: DefaultCSSEntryList
+};
+
 export class CSS extends Component {
   private promises: PromiseMap = {}
   private caches: CacheMap = {}
-  private element: HTMLStyleElement = document.createElement("style")
+  private element: HTMLStyleElement = document.head.getElementsByTagName("style")[0]
   private entries: IdEntryList = []
 
-  constructor(options: InitOptions) {
+  constructor(options: CSSOptions) {
     super({
       P: options.P,
     });
 
-    document.head.appendChild(this.element);
-
     const changeListener: EventListener = () => this.build();
+
+    const cssText = this.element!.textContent;
+
+    options.default.forEach((entry) => {
+      const start = entry.position[0];
+      const end = start + entry.position[1];
+      const id = entry.id;
+      const type = entry.type;
+
+      this.caches[id] = {
+        id: id,
+        text: cssText!.slice(start, end),
+        type: type,
+      };
+    });
 
     [
       "360",
@@ -87,11 +114,34 @@ export class CSS extends Component {
 
                     let position;
 
-                    // hover
-                    if ("h" === char35[8]) { // "h"
-                      type = "hover";
-                      position = [21, -1,];
+                    if ("h" === char35[8]) {
+                      // @media (hover:hover) and (prefers-color-scheme:light)
+                      let start = 21;
 
+                      if ("(" === char35[25]) {
+
+                        if ("l" === cssText[47]) {
+                          type = "hover:light";
+                          start = 54;
+                        } else {
+                          type = "hover:dark";
+                          start = 53;
+                        }
+                      } else {
+                        type = "hover";
+                      }
+
+                      position = [start, -1,];
+                    } else if ("p" === char35[8]) {
+                      if ("l" === char35[29]) {
+                        type = "light";
+                        position = [36, -1,];
+
+                      } else {
+                        type = "dark";
+                        position = [35, -1,];
+
+                      }
                     } else {
                       const size = parseInt(char35.slice(-6), 10);
 
@@ -187,6 +237,8 @@ export class CSS extends Component {
       }
     });
 
+    const isDark = document.documentElement.classList.contains("t2");
+
     let allCSSText = "";
 
     for (let a = [
@@ -196,6 +248,10 @@ export class CSS extends Component {
       ["min768", "screen and (min-width:768px)",],
       ["min1024", "screen and (min-width:1024px)",],
       ["hover", "(hover:hover)"],
+      ["light", !isDark],
+      ["dark", isDark],
+      ["hover:light", isDark ? false : "(hover:hover)"],
+      ["hover:dark", !isDark ? false : "(hover:hover)"],
     ], i = 0; a.length > i; i++) {
       let entry = a[i];
       let type: StyleType = entry[0] as StyleType;
@@ -204,15 +260,18 @@ export class CSS extends Component {
       if ("string" === typeof cssTextOrUndefined) {
         let cssText: CSSText = cssTextOrUndefined;
         let mediaQuery = entry[1];
-        if (mediaQuery && !matchMedia(mediaQuery).matches) continue;
-        allCSSText += (mediaQuery ? "@media " + mediaQuery + "{" : "") + cssText + (mediaQuery ? "}" : "");
+
+        if ("boolean" === typeof mediaQuery ? mediaQuery : !(mediaQuery && !matchMedia(mediaQuery).matches)) {
+          // media queryの宣言は必要ない
+          // const isHoverType: boolean = "hover" === type;
+          // allCSSText += (isHoverType ? "@media " + mediaQuery + "{" : "") + cssText + (isHoverType ? "}" : "");
+          allCSSText += cssText;
+        }
       }
     }
 
     if (styleE.textContent !== allCSSText) {
       styleE.innerHTML = allCSSText;
-    } else {
-      console.log("skip");
     }
   }
 
