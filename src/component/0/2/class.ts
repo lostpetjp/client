@@ -11,7 +11,6 @@ export type DocContentData = {
 
 export class TermsContent extends Component implements Content, DocTemplateContent {
   P?: DocumentItem
-  id: number = 2
 
   title?: string
   description?: string
