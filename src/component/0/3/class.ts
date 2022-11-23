@@ -27,7 +27,7 @@ type RecaptchaId = null | number
  */
 export class Recaptcha extends Component {
   private id: RecaptchaId = null
-  private readonly siteKey: string = "[SITE KEY]"
+  private readonly siteKey: string = "${{SITE_KEY}}"
 
   // value
   private $value: RecaptchaValue = null
