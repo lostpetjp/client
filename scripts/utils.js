@@ -38,7 +38,7 @@ exports.buildJs = async (options) => {
             },
             toplevel: true,
             mangle: {
-              reserved: "script" === id ? ["a"] : [],
+              reserved: "script" === id ? ["a"] : ["grecaptcha",],
               properties: {
                 regex: /^_/,
               },
