@@ -240,20 +240,23 @@ export class DocumentM extends Component {
 
   attach(rootE: HTMLElement = document.body) {
     const canHover = matchMedia("(hover:hover)").matches;
+    const hostname = location.hostname;
 
     // a要素にイベントを設定
     for (let i = 0, a = rootE.getElementsByTagName("a"); a.length > i; i++) {
       let aE = a[i];
 
-      aE.addEventListener("click", this.clickEventListener, {
-        passive: false,
-      });
-
-      if (canHover && !DocumentM.caches[aE.pathname + aE.search]) {
-        aE.addEventListener("mouseover", this.mouseoverEventListener, {
-          once: true,
-          passive: true,
+      if (aE.href && hostname === aE.hostname) {
+        aE.addEventListener("click", this.clickEventListener, {
+          passive: false,
         });
+
+        if (canHover && !DocumentM.caches[aE.pathname + aE.search]) {
+          aE.addEventListener("mouseover", this.mouseoverEventListener, {
+            once: true,
+            passive: true,
+          });
+        }
       }
     }
   }
