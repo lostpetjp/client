@@ -31,7 +31,7 @@ export type Init = (options: InitOptions) => void
 export type Emit = (name: EventName) => void
 
 export type ComponentList = Array<Component>
-export type TimeoutIdMap = { [key: number | string]: string | number | undefined }
+export type TimeoutIdMap = { [key: number | string]: any }
 
 export type EventName = string
 
