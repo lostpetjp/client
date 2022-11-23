@@ -327,6 +327,7 @@ export class DocumentItem extends Component {
             });
 
             newTemplate = newTemplate!
+            newTemplate.id = templateId;
           }
 
           if (1 > newTemplate.readyState) {
@@ -337,11 +338,14 @@ export class DocumentItem extends Component {
             newTemplate.readyState = 1;
           }
 
-          const newContent: Content = this.content = new (js.get(data.content.component))({
+          const contentId = data.content.component;
+
+          const newContent: Content = this.content = new (js.get(contentId))({
             P: this,
           });
 
           newTemplate!.content = newContent;
+          newContent.id = contentId;
 
           if ("function" === typeof newContent!.ready) {
             promises.push(newContent.ready());
