@@ -3,7 +3,7 @@ import { ContentData, DocumentItem } from "../../script/document"
 
 export interface Content extends Component {
   P?: DocumentItem
-  id: number
+  id?: number
 
   ready?(): Promise<void>
   create(data: ContentData): Promise<void> | void
