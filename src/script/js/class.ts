@@ -38,7 +38,7 @@ export class JS extends Component {
               const styleIds: Array<number> | undefined = moduleDefault.css;
 
               scriptIds?.forEach((id) => promises.push(this.load(id)));
-              styleIds?.forEach((id) => promises.push(this.window!.css!.load(id)));
+              if (styleIds) promises.push(this.window!.css!.load(styleIds));
             }
 
             return Promise.all(promises);
