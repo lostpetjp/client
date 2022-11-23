@@ -1,8 +1,10 @@
 import { Win } from "./window"
 import { Factory, features } from "./factory"
 import { DocumentData } from "./document"
+import { DefaultCSSEntryList } from "./css"
 
 export type ServerOptions = {
+  css: DefaultCSSEntryList
   document: DocumentData
   version: number
 }
