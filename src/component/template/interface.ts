@@ -15,7 +15,7 @@ export type TemplateReadyState = 0 | 1 | 2 | 3 | 4;
 export interface Template extends Component {
   P?: DocumentM
 
-  id: number
+  id?: number
   element?: HTMLElement
   content?: Content
 
