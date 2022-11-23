@@ -18,7 +18,7 @@ export interface DocTemplateContent {
  */
 export class DocTemplate extends Component implements Template {
   P?: DocumentM
-  readonly id: number = 0
+  readonly id: number = 1
   element?: HTMLElement
   content?: Content
 
@@ -26,6 +26,7 @@ export class DocTemplate extends Component implements Template {
   private article?: HTMLElement
   private header?: HTMLElement
   private heading?: HTMLElement
+  private description?: HTMLElement
 
   constructor(options: Options) {
     super({
@@ -42,6 +43,8 @@ export class DocTemplate extends Component implements Template {
     const headingE = this.heading = document.createElement("h1");
     headingE.className = "c1";
     headerE.appendChild(headingE);
+
+    const descriptionE = this.description = headingE.nextSibling as HTMLElement;
   }
 
   parse(): void {
@@ -51,27 +54,36 @@ export class DocTemplate extends Component implements Template {
     const articleE = this.article = mainE.getElementsByTagName("article")[0] as HTMLElement;
     const headerE = this.header = articleE.firstChild as HTMLElement;
     const headingE = this.heading = headerE.firstChild as HTMLElement;
+    const descriptionE = this.description = headingE.nextSibling as HTMLElement;
   }
 
   build(): void {
     const doc = this.P!;
 
-    console.log(this, doc.mode);
-
     if (2 !== doc.mode) {
+      const win = this.window!;
+
       const content = this.content! as TermsContent;
-      const articleE = this.article as HTMLElement;
-      const headingE = this.heading as HTMLElement;
+      const articleE = this.article!;
+      const headingE = this.heading!;
+      const descriptionE = this.description!;
 
       // for heading
       headingE.textContent = content.title!;
 
-      // for body
-      //while (articleE.childNodes[1]) {
-      //  articleE.childNodes[1].remove();
-      //}
+      // for description
+      while (descriptionE.firstChild) {
+        descriptionE.firstChild.remove();
+      }
 
-      //articleE.appendChild(content.element!);
+      descriptionE.appendChild(win.element!.create(content.description!));
+
+      // for body
+      while (articleE.childNodes[1]) {
+        articleE.childNodes[1].remove();
+      }
+
+      articleE.appendChild(content.element!);
     }
   }
 }
