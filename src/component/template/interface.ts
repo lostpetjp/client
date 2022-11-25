@@ -25,4 +25,5 @@ export interface Template extends Component {
   create(): Promise<void> | void
   parse(): Promise<void> | void
   build(): Promise<void> | void
+  attach?(): Promise<void> | void
 }
