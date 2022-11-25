@@ -1,4 +1,4 @@
-import { Component, InitOptions } from "../../component";
+import { Component, ExtendsTarget, InitOptions } from "../../component";
 
 type CacheMap = {
   [key: string]: any
@@ -53,6 +53,10 @@ export class JS extends Component {
                 component = moduleDefault.component;
                 this.caches[moduleDefault.id] = component;
                 this.window!.factory.create(component);
+
+                moduleDefault.plugins?.forEach((component: ExtendsTarget) => {
+                  this.window!.factory.create(component);
+                });
               } else {
                 const constructor = component = moduleDefault.constructor;
                 component = this.caches[id] = constructor ? constructor : moduleDefault;
