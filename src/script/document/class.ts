@@ -146,6 +146,7 @@ export class DocumentM extends Component {
       navE,
       footerE,
     ].forEach((rootE) => this.attach(rootE as HTMLElement));
+
   }
 
   preload(options: DocumentPreloadOptions): Promise<DocumentData> {
@@ -432,9 +433,17 @@ export class DocumentItem extends Component {
           if (4 > template.readyState) {
             const mainE = doc.main!;
 
-            if (mainE !== templateE) doc.body!.replaceChild(templateE, mainE);
+            if (mainE !== templateE) doc.body!.replaceChild(templateE, doc.main = mainE);
 
             template.readyState = 4;
+          }
+
+          if ("function" === typeof template.attach) {
+            template.attach();
+          }
+
+          if ("function" === typeof content.attach) {
+            content.attach();
           }
 
           // scroll position
@@ -443,7 +452,9 @@ export class DocumentItem extends Component {
           }
 
           // update location
-          history.replaceState(history.state, document.title, "https://" + location.hostname + data.pathname + data.search);
+          if (location.pathname !== data.pathname || location.search !== data.search) {
+            history.replaceState(history.state, document.title, "https://" + location.hostname + data.pathname + data.search);
+          }
 
           // update document.head
           const head = data.head;
@@ -480,3 +491,33 @@ export class DocumentItem extends Component {
       });
   }
 }
+
+/*
+Navigation API
+
+declare var navigation: {
+  addEventListener: (name: string, callback: CallableFunction, options?: EventListenerOptions) => void
+};
+
+    navigation.addEventListener("navigate", (event: {
+      destination: {
+        url: string
+      }
+      intercept: CallableFunction
+      navigationType: string
+    }) => {
+      if ("traverse" === event.navigationType) {
+        const url = new URL(event.destination.url);
+
+        event.intercept({
+          handler: async () => {
+            console.log("hello", event, this);
+            await this.preload({
+              pathname: url.pathname,
+              search: url.search,
+            })
+          }
+        });
+      }
+    });
+*/
