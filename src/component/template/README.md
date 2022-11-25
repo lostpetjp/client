@@ -12,6 +12,6 @@
 | 1 | `ready()`を実行した。 |
 | 2 | `create()/parse()`を実行した。 |
 | 3 | `window.css.attach()`を実行した。 |
-| 4 | DOMに接続された。 |
+| 4 | DOMに接続し、`attach()`を実行した。 |
 
 
