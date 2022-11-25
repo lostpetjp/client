@@ -54,28 +54,44 @@ export class Recaptcha extends Component {
 
     var scriptE = document.createElement("script");
 
-    (new Promise<void>((resolve) => {
-      scriptE.src = "//www.google.com/recaptcha/api.js";
-      document.body.appendChild(scriptE);
+    this.window!.fetch({
+      credentials: true,
+      method: "GET",
+      path: "recaptcha",
+    })
+      .then((res) => {
+        console.log("res", res);
 
-      var timeouts = this.T;
+        return (new Promise<void>((resolve) => {
+          scriptE.src = "//www.google.com/recaptcha/api.js";
+          document.body.appendChild(scriptE);
 
-      timeouts[0] = setInterval(() => {
-        if (this.S) {
-          if ("grecaptcha" in self) {
-            clearInterval(this.T[0]);
-            resolve();
-          }
-        }
-      }, 8);
-    }))
+          var timeouts = this.T;
+
+          timeouts[0] = setInterval(() => {
+            if (this.S) {
+              if ("grecaptcha" in self) {
+                clearInterval(this.T[0]);
+                resolve();
+              }
+            }
+          }, 8);
+        }));
+      })
       .then(() => {
         if (this.S) {
           grecaptcha.ready(() => {
             if (this.S) {
               var win = this.window!;
               var errorEv = () => (this.value = null);
-
+              console.log({
+                callback: (code: string) => (this.value = code),
+                "error-callback": errorEv,
+                "expired-callback": errorEv,
+                sitekey: this.siteKey,
+                size: 360 > win.innerWidth ? "compact" : "normal",
+                theme: (document.documentElement.classList.contains("t2")) ? "dark" : "light",
+              });
               this.id = grecaptcha.render(element, {
                 callback: (code) => (this.value = code),
                 "error-callback": errorEv,
