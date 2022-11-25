@@ -158,8 +158,8 @@ export class Win extends Component {
 
   }
 
-  innerWidth: number = innerHeight
-  innerHeight: number = innerWidth
+  innerHeight: number = innerHeight
+  innerWidth: number = innerWidth
 
   factory: Factory = new Factory
   version: number = 0
