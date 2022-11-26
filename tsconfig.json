@@ -15,6 +15,7 @@
     "declarationDir": "./dist/types",
     "declaration": true,
     "lib": [
+      "WebWorker",
       "dom",
       "es6"
     ],
