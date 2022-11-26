@@ -16,7 +16,7 @@ exports.buildJs = async (options) => {
 
   const id = tokens.pop();
   const src = options.src;
-  const dist = "dist" + ("script" === id ? "/script" : `/scripts/${id}`) + (minify ? ".min" : "") + ".js";
+  const dist = "dist" + ("sw" === id ? "/sw" : ("script" === id ? "/script" : `/scripts/${id}`)) + (minify ? ".min" : "") + ".js";
 
   await (await rollup({
     input: options.src,
