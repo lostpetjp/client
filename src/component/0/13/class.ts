@@ -79,7 +79,9 @@ export class FromValidityManager extends Component {
               this.button.classList.remove("c23");
 
               this.items.forEach(item => item.clear());
-              this.check();
+
+              // this.check();
+
               this.button.disabled = true;
 
               this.window!.css.detach(this, 23);
