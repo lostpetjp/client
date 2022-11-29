@@ -1,3 +1,5 @@
+import { mergeDeep } from "../../utils/mergeDeep"
+
 export type AttributeJSON = {
   [key: string]: any
 }
@@ -13,7 +15,9 @@ export type ElementJSON = {
 }
 
 export class Json2Node {
-  create(options: any): Node {
+  create(options: any, ...sources: Array<any>): Node {
+    if (sources.length) options = mergeDeep(options, ...sources);
+
     if (undefined === options || null === options) {
       return document.createDocumentFragment();
 
@@ -81,11 +85,11 @@ export class Json2Node {
           }
         }
 
-        if (hasProperty) {
+        if (hasProperty && !isSvg) {
           element[property] = value;
 
         } else if ("string" === typeof value) {
-          if (isSvg) {
+          if (isSvg && "viewBox" !== property) {
             element.setAttributeNS(null, property, value);
           } else {
             element.setAttribute(property, value);
