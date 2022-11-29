@@ -12,7 +12,7 @@ import { Drawer } from "../drawer"
 
 export type FetchOptions = {
   credentials: boolean
-  body?: any
+  body?: { [key: string]: any } | FormData
   method: "GET" | "POST" | "PATCH" | "PUT"
   path: string
   priority?: "high" | "low" | "auto"
@@ -109,8 +109,17 @@ export class Win extends Component {
   }
 
   fetch(options: FetchOptions): Promise<{ [key: string]: any }> {
-    let reqBody = options.body;
-    if (reqBody) reqBody = JSON.stringify(reqBody);
+    let reqBody: any = options.body;
+
+    if (reqBody) {
+      if (reqBody instanceof FormData) {
+        const object = {};
+        reqBody.forEach((value, key) => object[key] = value);
+        reqBody = object;
+      }
+
+      reqBody = JSON.stringify(reqBody);
+    }
 
     const credentials = options.credentials;
     const method = options.method;
@@ -159,7 +168,7 @@ export class Win extends Component {
         })
         .then((res) => {
           if (this.S) {
-            resolve("undefined" === typeof res.body ? null : res.body);
+            resolve("undefined" === typeof res.body ? {} : res.body);
           }
         })
         .catch((err) => {
