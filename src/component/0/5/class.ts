@@ -6,7 +6,7 @@ export const DialogItemStyleIdList = [4, 5, 21,];
 
 export type DialogItemOptions = InitOptions & {
   confirm?: ConfirmOptions
-  root: Dialog
+  root?: Dialog
   title?: string | Node
   content?: string | Node | Array<string | Node>
 }
