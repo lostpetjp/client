@@ -180,7 +180,7 @@ export class DocumentM extends Component {
                   event.preventDefault();
 
                   this.window!.js.load(11)
-                    .then((constructor: typeof OpenDrawer) => {
+                    .then(([constructor]: [typeof OpenDrawer]) => {
                       if (this.S) {
                         new constructor({
                           P: this,
@@ -224,7 +224,7 @@ export class DocumentM extends Component {
       const aE = event.currentTarget as HTMLAnchorElement;
 
       this.window!.js.load(9)
-        .then((constructor: typeof ColorSchemeChange) => {
+        .then(([constructor]: [typeof ColorSchemeChange]) => {
           if (this.S) {
             new constructor({
               P: this,
@@ -242,7 +242,7 @@ export class DocumentM extends Component {
       const aE = event.currentTarget as HTMLAnchorElement;
 
       this.window!.js.load(10)
-        .then((constructor: typeof ReduceMotionChange) => {
+        .then(([constructor]: [typeof ReduceMotionChange]) => {
           if (this.S) {
             new constructor({
               P: this,
@@ -281,8 +281,8 @@ export class DocumentM extends Component {
 
             return Promise.all([
               data,
-              ...Array.from(new Set([...templateData.css, ...contentData.css])).map((id) => win.css!.load(id)),
-              ...[templateData.component, contentData.component, ...templateData.js, ...contentData.js].map((id) => win.js!.load(id)),
+              win.css!.load(Array.from(new Set([...templateData.css, ...contentData.css]))),
+              win.js!.load([templateData.component, contentData.component, ...templateData.js, ...contentData.js]),
             ]);
           }
         })
