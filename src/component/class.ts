@@ -2,7 +2,7 @@ import { Win } from "../script/window"
 
 export class Component {
   constructor(options: InitOptions) {
-    (this.init as Init)(options);
+    this.init!(options);
   }
 
   window?: Win
@@ -28,7 +28,7 @@ export type On = (source: Component, name: EventName, callback: EventCallback, o
 export type Off = (source: Component | null, name: EventName, callback: EventCallback) => void
 export type Destroy = () => void
 export type Init = (options: InitOptions) => void
-export type Emit = (name: EventName) => void
+export type Emit = (name: EventName, event?: EmitEventData) => { [key: string]: any }
 
 export type ComponentList = Array<Component>
 export type TimeoutIdMap = { [key: number | string]: any }
@@ -56,11 +56,18 @@ export type ToEventEntryMap = { [key: EventName]: ToEventEntryList }
 export type FromEventEntry = [Component, EventName, EventCallback,];
 export type FromEventEntryList = Array<FromEventEntry>
 
-export type EventCallback = (event: EventData | null, info: EventInfo) => void
-export type EventData = { [key: string]: any }
-export type EventInfo = {
+export type EventCallback = (event: EventData) => void
+
+export type EmitEventData = {
+  [key: string]: any
+}
+
+export type CallbackEventData = EmitEventData & {
   source: Component
   target: Component
+}
+
+export type EventData = CallbackEventData & {
   type: EventName
 }
 
