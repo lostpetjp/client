@@ -26,6 +26,7 @@ type RecaptchaId = null | number
  * 指定した要素にRecaptchaを配置する
  */
 export class Recaptcha extends Component {
+  private element: HTMLDivElement
   private id: RecaptchaId = null
   private readonly siteKey: string = "${{SITE_KEY}}"
 
@@ -45,12 +46,15 @@ export class Recaptcha extends Component {
     if (null !== this.id) grecaptcha.reset(this.id);
   }
 
+  confirmed: boolean = false
+
   constructor(options: RecaptchaOptions) {
     super({
+      on: options.on,
       P: options.P,
     });
 
-    const element = options.element;
+    const element = this.element = options.element;
 
     var scriptE = document.createElement("script");
 
@@ -60,46 +64,54 @@ export class Recaptcha extends Component {
       path: "recaptcha",
     })
       .then((res) => {
-        console.log("res", res);
+        if (this.S) {
+          if (res && res.status) {
+            this.confirmed = true;
+            this.element.remove();
+            this.emit!("ready");
 
-        return (new Promise<void>((resolve) => {
-          scriptE.src = "//www.google.com/recaptcha/api.js";
-          document.body.appendChild(scriptE);
+          } else {
+            return (new Promise<void>((resolve) => {
+              scriptE.src = "//www.google.com/recaptcha/api.js";
+              document.body.appendChild(scriptE);
 
-          var timeouts = this.T;
+              var timeouts = this.T;
 
-          timeouts[0] = setInterval(() => {
-            if (this.S) {
-              if ("grecaptcha" in self) {
-                clearInterval(this.T[0]);
-                resolve();
-              }
-            }
-          }, 8);
-        }));
+              timeouts[0] = setInterval(() => {
+                if (this.S) {
+                  if ("grecaptcha" in self) {
+                    clearInterval(this.T[0]);
+                    resolve();
+                  }
+                }
+              }, 8);
+            }));
+          }
+        }
       })
       .then(() => {
-        if (this.S) {
+        if (this.S && !this.confirmed) {
           grecaptcha.ready(() => {
             if (this.S) {
               var win = this.window!;
-              var errorEv = () => (this.value = null);
-              console.log({
-                callback: (code: string) => (this.value = code),
-                "error-callback": errorEv,
-                "expired-callback": errorEv,
-                sitekey: this.siteKey,
-                size: 360 > win.innerWidth ? "compact" : "normal",
-                theme: (document.documentElement.classList.contains("t2")) ? "dark" : "light",
-              });
+              var errorEv = () => {
+                this.value = null;
+                this.emit!("input");
+              };
+
               this.id = grecaptcha.render(element, {
-                callback: (code) => (this.value = code),
+                callback: (code) => {
+                  this.value = code;
+                  this.emit!("input");
+                },
                 "error-callback": errorEv,
                 "expired-callback": errorEv,
                 sitekey: this.siteKey,
                 size: 360 > win.innerWidth ? "compact" : "normal",
                 theme: (document.documentElement.classList.contains("t2")) ? "dark" : "light",
               });
+
+              this.emit!("ready");
             }
           });
         }
