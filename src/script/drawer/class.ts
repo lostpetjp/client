@@ -57,7 +57,7 @@ export class Drawer extends Component {
       if (isLeft) this.close();
 
       win.js.load(isLeft ? 8 : 7)
-        .then((constructor: typeof DrawerItemFullpage | typeof DrawerItemLeft) => {
+        .then(([constructor]: [typeof DrawerItemFullpage | typeof DrawerItemLeft]) => {
           const newItem = new constructor(options);
 
           this.items.push(newItem);
