@@ -42,7 +42,7 @@ export class OpenDrawer extends Component {
       const aE = event.currentTarget as HTMLAnchorElement;
 
       this.window!.js.load(9)
-        .then((constructor: typeof ColorSchemeChange) => {
+        .then(([constructor]: [typeof ColorSchemeChange]) => {
           if (this.S) {
             new constructor({
               P: this,
@@ -60,7 +60,7 @@ export class OpenDrawer extends Component {
       const aE = event.currentTarget as HTMLAnchorElement;
 
       this.window!.js.load(10)
-        .then((constructor: typeof ReduceMotionChange) => {
+        .then(([constructor]: [typeof ReduceMotionChange]) => {
           if (this.S) {
             new constructor({
               P: this,
@@ -87,7 +87,7 @@ export class OpenDrawer extends Component {
     }
 
     win.js.load(8)
-      .then((constructor: typeof DrawerItemLeft) => {
+      .then(([constructor]: [typeof DrawerItemLeft]) => {
         new constructor({
           on: {
             destroy: () => this.destroy!(),
