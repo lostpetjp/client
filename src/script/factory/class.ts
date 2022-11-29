@@ -1,7 +1,7 @@
 import { Win } from "../window"
 import {
   Component, Init, InitOptions, On, Off, Emit, Destroy, TimeoutIdMap, ToEventEntryMap, ToEventEntryList, FromEventEntryList,
-  ComponentList, ExtendsTarget, EventName, EventCallback, EventOptions, EventData,
+  ComponentList, ExtendsTarget, EventName, EventCallback, EventOptions, EventData, EmitEventData,
 } from "../../component"
 
 type features = {
@@ -107,15 +107,16 @@ export const features: features = {
     listeners[name] = newEntries;
   },
   // emit()
-  emit: function (this: Component, name: EventName, object?: EventData) {
-    // const isDestroy = "destroy" === name;
+  emit: function (this: Component, name: EventName, object?: EmitEventData): any {
     const listeners = this.D;
+    const isDestroy = "destroy" === name;
 
-    // if (!listeners || (1 !== this.S && !isDestroy)) return;
-    if (!listeners || (!this.S)) return;
+    if (!listeners || (!this.S && !isDestroy)) return;
 
     const entries = listeners[name];
     if (!entries) return;
+
+    let event = object || {};
 
     for (let i = entries.length; i--;) {
       let entry = entries[i];
@@ -123,22 +124,27 @@ export const features: features = {
       let callback = entry[0];
       let options = entry[1];
 
-      if (source && !source.S) {
+      if (source && !source.S && !isDestroy) {
 
       } else {
-        callback(object || null, {
-          source: source,
-          target: this,
-          type: name,
+        callback({
+          ...event,
+          ...{
+            source: source,
+            target: this,
+            type: name,
+          }
         });
 
-        if ((!options || !options.once)) {
+        if ((!options || !options.once) && !isDestroy) {
           continue;
         }
       }
 
       this.off!(source, name, callback);
     }
+
+    return event;
   },
   // destroy()
   destroy: function (this: Component) {
@@ -153,9 +159,9 @@ export const features: features = {
       cancelAnimationFrame(id as number);
     }
 
-    this.emit!("destroy");
-
     this.S = false;
+
+    this.emit!("destroy");
 
     for (let i = 0, a = this.E; a.length > i; i++) {
       let entry = a[i];
