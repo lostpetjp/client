@@ -112,6 +112,8 @@ export class Recaptcha extends Component {
       });
 
     this.on!(this, "destroy", () => {
+      this.reset();
+
       scriptE.remove();
     });
   }
