@@ -70,18 +70,26 @@ exports.buildJs = async (options) => {
   });
 
   // 環境変数の変換
-  const convertPath = path.dirname(src) + "/.build/convert.json";
+  const convertPath = path.dirname(src) + "/.local/convert.json";
+  const prefixPath = path.dirname(src) + "/.local/prefix.txt";
+
+  let fileText = fs.readFileSync(dist, "utf8");
+  const beforeFileText = fileText;
+
+  if (fs.existsSync(prefixPath)) {
+    let prefixText = fs.readFileSync(prefixPath, "utf8");
+    fileText = prefixText + fileText;
+  }
 
   if (fs.existsSync(convertPath)) {
-    let fileText = fs.readFileSync(dist, "utf8");
-
     const buildJson = JSON.parse(fs.readFileSync(convertPath, "utf8"));
 
     for (let key in buildJson) {
       fileText = fileText.replace(new RegExp("\\$\\{\\{" + key + "\\}\\}", "g"), buildJson[key]);
     }
-
-    fs.writeFileSync(dist, fileText);
   }
 
+  if (beforeFileText !== fileText) {
+    fs.writeFileSync(dist, fileText);
+  }
 };
