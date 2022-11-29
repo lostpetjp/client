@@ -14,28 +14,18 @@ export class QRCode {
 
   private static PAD1 = 0x11;
 
-  private typeNumber: number;
+  private typeNumber: number = 0;
 
-  private errorCorrectLevel: ErrorCorrectLevel;
+  private errorCorrectLevel: ErrorCorrectLevel = ErrorCorrectLevel.H;
 
-  private qrDataList: QRData[];
+  private qrDataList: QRData[] = [];
 
-  private modules: boolean[][];
+  private modules: boolean[][] = [];
 
-  private moduleCount: number;
-
-  public constructor() {
-    this.typeNumber = 1;
-    this.errorCorrectLevel = ErrorCorrectLevel.L;
-    this.qrDataList = [];
-  }
+  private moduleCount: number = 0;
 
   public getTypeNumber(): number {
     return this.typeNumber;
-  }
-
-  public setTypeNumber(typeNumber: number): void {
-    this.typeNumber = typeNumber;
   }
 
   public getErrorCorrectLevel(): ErrorCorrectLevel {
@@ -81,6 +71,31 @@ export class QRCode {
   }
 
   public make(): void {
+    let typeNumber;
+
+    for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+      var rsBlocks = RSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+      var buffer = new BitBuffer();
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i++) {
+        totalDataCount += rsBlocks[i].getDataCount();
+      }
+
+      for (var i = 0; i < this.qrDataList.length; i++) {
+        var data = this.qrDataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), data.getLengthInBits(typeNumber));
+        data.write(buffer);
+      }
+
+      if (buffer.getLengthInBits() <= totalDataCount * 8)
+        break;
+    }
+
+    this.typeNumber = typeNumber;
+
+
     this.makeImpl(false, this.getBestMaskPattern());
   }
 
