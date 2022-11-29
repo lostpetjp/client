@@ -1,4 +1,4 @@
-import { Component, InitOptions } from "../../../component"
+import { Component } from "../../../component"
 import { DocumentItem, ContentData } from "../../../script/document"
 import { Content } from "../../content"
 import { DocTemplateContent } from "../1/class"
@@ -32,7 +32,6 @@ export class ContactContent extends Component implements Content, DocTemplateCon
   }
 
   attach(): void | Promise<void> {
-
     const formE = this.element! as HTMLFormElement;
     const controlsCollection = formE.elements;
 
@@ -58,9 +57,48 @@ export class ContactContent extends Component implements Content, DocTemplateCon
           type: "recaptcha",
         },
       ],
-      submit: (formData: FormData): Promise<void> => {
-        // fetch
-        return Promise.resolve();
+      submit: (controller: FromValidityManager, formData: FormData): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          this.window!.fetch({
+            credentials: true,
+            body: formData,
+            method: "POST",
+            path: "contact",
+          })
+            .then((res) => {
+              if (this.S) {
+                res = res as {
+                  error?: string | Array<string>
+                  status?: boolean
+                };
+
+                const error = res.error;
+
+                this.window!.dialog.create({
+                  P: this,
+                  title: error ? "エラー" : "送信完了",
+                  content: error ? error : [
+                    "ありがとうございます。",
+                    "問い合わせを送信しました。",
+                  ],
+                });
+
+                if (res.status) {
+                  console.log("reset");
+                  controller.reset();
+                }
+
+                resolve();
+              }
+            })
+            .catch((err) => {
+              if (this.S) {
+                console.error(err);
+                this.window!.throw();
+              }
+            })
+            .finally(reject);
+        });
       }
     });
   }
