@@ -1,9 +1,8 @@
-import { ContactContent, ContactForm } from "./class"
+import { ContactContent } from "./class"
 
 export default {
   id: 4,
-  js: [3],
+  js: [13,],
   type: "lostpetjp",
   component: ContactContent,
-  plugins: [ContactForm],
 }
