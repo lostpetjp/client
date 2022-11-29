@@ -33,6 +33,7 @@ exports.buildJs = async (options) => {
           const result = uglify.minify(code, {
             sourceMap: true,
             compress: {
+              // negate_iife: false,
               passes: 10,
             },
             output: {
