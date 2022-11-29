@@ -1,0 +1,1 @@
+export { SVGCloseElementJSON } from "./object"
