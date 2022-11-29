@@ -24,7 +24,7 @@ export class Dialog extends Component {
       const js = win.js!;
 
       js.load(5)
-        .then((constructor: typeof DialogItem) => {
+        .then(([constructor]: [typeof DialogItem]) => {
           var newItem = new constructor(options);
 
           this.items.push(newItem);
