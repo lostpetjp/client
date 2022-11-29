@@ -160,7 +160,7 @@ export class Popup extends Component {
       }
 
       js.load(6)
-        .then((constructor: typeof PopupItem) => {
+        .then(([constructor]: [typeof PopupItem]) => {
           if (this.S) {
             const isLayer = options.layer;
             const newItem = new constructor(options);
