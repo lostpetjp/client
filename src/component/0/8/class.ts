@@ -3,9 +3,9 @@ import { DrawerCloseOptions } from "../../../script/drawer";
 import { SVGCloseElementJSON } from "../../../utils/svg/close";
 
 export type DrawerItemLeftOptions = InitOptions & {
-  element: any
+  element?: any
   feature?: number
-  title: string
+  title?: string
 }
 
 export const DrawerItemLeftStyleIdList = [19, 21,]
@@ -123,7 +123,7 @@ export class DrawerItemLeft extends Component {
                 attribute: {
                   class: "c19a2",
                 },
-                children: options.title,
+                children: options.title!,
                 tagName: "div",
               },
             ],
