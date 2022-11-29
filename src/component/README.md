@@ -14,3 +14,5 @@
 | 9 | `color-scheme`の設定変更プロセス。 |
 | 10 | `reduce-motion`の設定変更プロセス。 |
 | 11 | ヘッダーでドロワーを開くプロセス。 |
+| 12 | QRCode generator |
+| 13 | form要素のvalidateとsubmit。 |
