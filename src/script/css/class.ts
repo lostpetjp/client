@@ -288,6 +288,33 @@ export class CSS extends Component {
     if (hasChange && (options && true === options.build)) this.build();
   }
 
+  detach(source: Component, ids: StyleId | StyleIdList): void {
+    if (!Array.isArray(ids)) ids = [ids];
+
+    let hasChange = false;
+
+    ids.forEach((id) => {
+      for (let i = 0, a = this.entries; a.length > i; i++) {
+        let entry = a[i];
+
+        if (id === entry.id) {
+          for (let ii = 0, aa = entry.sources; aa.length > ii; ii++) {
+            if (aa[ii] === source) {
+              entry.sources.splice(ii--, 1);
+              hasChange = true;
+            }
+          }
+
+          return;
+        }
+      }
+    });
+
+    if (hasChange) {
+      this.update();
+    }
+  }
+
   build(debounce: boolean = false): void {
     clearTimeout(this.T[0]);
 
