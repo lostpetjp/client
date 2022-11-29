@@ -6,6 +6,10 @@ import { Content } from "../../component/content";
 import { DocTemplate } from "../../component/0/1/class";
 import { ElementJSON } from "../element";
 import { ScriptId, ScriptIdList } from "../js";
+import { ColorSchemeChange } from "../../component/0/9/class";
+import { ReduceMotionChange } from "../../component/0/10/class";
+import { SVGDrawerElementJSON } from "../../utils/svg/drawer";
+import { OpenDrawer } from "../../component/0/11/class";
 
 export type DocumentOptions = InitOptions & {
   data?: DocumentData
@@ -82,6 +86,8 @@ export class DocumentM extends Component {
   nav?: HTMLElement
   footer?: HTMLElement
 
+  drawer?: HTMLAnchorElement
+
   private readonly clickEventListener: EventListener = (event: Event) => {
     const aE = event.currentTarget as HTMLAnchorElement;
 
@@ -126,11 +132,11 @@ export class DocumentM extends Component {
 
   constructor(options: DocumentInitOptions) {
     const children = document.body.childNodes;
-    const headerE = children[0];
-    const bodyE = children[1];
+    const headerE = children[0] as HTMLElement;
+    const bodyE = children[1] as HTMLElement;
     const bodyChildren = bodyE.childNodes;
-    const navE = bodyChildren[1];
-    const footerE = children[2];
+    const navE = bodyChildren[1] as HTMLElement;
+    const footerE = children[2] as HTMLElement;
 
     super({
       P: options.P,
@@ -147,6 +153,120 @@ export class DocumentM extends Component {
       footerE,
     ].forEach((rootE) => this.attach(rootE as HTMLElement));
 
+    const win = this.P! as Win;
+
+    const resizeEventListener = () => {
+      const hasDrawer = !matchMedia("screen and (min-width:1024px)").matches;
+      let drawerAE = this.drawer;
+
+      if (hasDrawer) {
+        if (!drawerAE) {
+          const element = this.window!.element;
+
+          drawerAE = this.drawer = element.create({
+            attribute: {
+              class: "a2 d1c hb2",
+              role: "button",
+            },
+            children: element.create(SVGDrawerElementJSON, {
+              attribute: {
+                height: "24",
+                width: "24",
+              },
+            }),
+            on: {
+              click: [
+                (event: MouseEvent | TouchEvent) => {
+                  event.preventDefault();
+
+                  this.window!.js.load(11)
+                    .then((constructor: typeof OpenDrawer) => {
+                      if (this.S) {
+                        new constructor({
+                          P: this,
+                        });
+                      }
+                    });
+                },
+                {
+                  passive: false,
+                },
+              ],
+            },
+            tagName: "a",
+          }) as HTMLAnchorElement;
+        }
+      }
+
+      const parentNode = drawerAE ? drawerAE.parentNode : null;
+
+      if (hasDrawer && !parentNode) {
+        const headerE = this.header!;
+        headerE.insertBefore(drawerAE!, headerE.firstChild);
+
+      } else if (!hasDrawer && parentNode) {
+        drawerAE!.remove();
+      }
+    }
+
+    win.css.on!(this, "resize", resizeEventListener);
+
+    resizeEventListener();
+
+    const aEs = navE.getElementsByTagName("a");
+
+    const colorSchemeAE = aEs[aEs.length - 2]!;
+    const reduceMotionAE = aEs[aEs.length - 1]!;
+
+    colorSchemeAE.addEventListener("click", (event: MouseEvent | TouchEvent) => {
+      event.preventDefault();
+
+      const aE = event.currentTarget as HTMLAnchorElement;
+
+      this.window!.js.load(9)
+        .then((constructor: typeof ColorSchemeChange) => {
+          if (this.S) {
+            new constructor({
+              P: this,
+              element: aE,
+            });
+          }
+        });
+    }, {
+      passive: false,
+    });
+
+    reduceMotionAE.addEventListener("click", (event: MouseEvent | TouchEvent) => {
+      event.preventDefault();
+
+      const aE = event.currentTarget as HTMLAnchorElement;
+
+      this.window!.js.load(10)
+        .then((constructor: typeof ReduceMotionChange) => {
+          if (this.S) {
+            new constructor({
+              P: this,
+              element: aE,
+            });
+          }
+        });
+    }, {
+      passive: false,
+    });
+
+    for (let a = [
+      colorSchemeAE,
+      reduceMotionAE,
+    ], i = 0; a.length > i; i++) {
+      for (let aa = [
+        "mousedown",
+        "touchstart",
+      ], ii = 0; aa.length > ii; ii++) {
+        const name = aa[ii] as "mousedown" | "touchstart";
+
+        a[i].addEventListener(name, (event: MouseEvent | TouchEvent) => event.stopPropagation(), { passive: true });
+      }
+    }
   }
 
   preload(options: DocumentPreloadOptions): Promise<DocumentData> {
@@ -282,6 +402,11 @@ export class DocumentItem extends Component {
       search: newSearch,
     });
 
+    const win = this.window!;
+    win.popup.close();
+    win.dialog.close();
+    win.drawer.close();
+
     //(2 === documentM.mode ? Promise.resolve(options.data!) : documentM.getInfo(newPathname, newSearch))
     documentM.preload(2 === documentM.mode ? {
       data: options.data,
@@ -289,26 +414,27 @@ export class DocumentItem extends Component {
       pathname: newPathname,
       search: newSearch,
     })
+      /*
+      // 重複処理のため削除
+        .then((data) => {
+          const win = this.window!;
+  
+          if (this.S) {
+            const templateData = data.template;
+            const contentData = data.content;
+  
+            return Promise.all([
+              data,
+              ...Array.from(new Set([...templateData.css, ...contentData.css])).map((id) => win.css!.load(id)),
+              ...[templateData.component, contentData.component, ...templateData.js, ...contentData.js].map((id) => win.js!.load(id)),
+            ]);
+          }
+        })*/
       .then((data) => {
-        const win = this.window!;
-
-        if (this.S) {
-          const templateData = data.template;
-          const contentData = data.content;
-
-          return Promise.all([
-            data,
-            ...Array.from(new Set([...templateData.css, ...contentData.css])).map((id) => win.css!.load(id)),
-            ...[templateData.component, contentData.component, ...templateData.js, ...contentData.js].map((id) => win.js!.load(id)),
-          ]);
-        }
-      })
-      .then((res) => {
         const win = this.window!;
         const documentM = this.P!;
 
         if (this.S) {
-          const data = res![0];
           const js = win.js!;
           const promises: Array<Promise<void> | DocumentData | void> = [
             data,
@@ -320,7 +446,6 @@ export class DocumentItem extends Component {
           if (newTemplate && newTemplate.S && templateId !== newTemplate.id) {
             newTemplate.destroy!();
           }
-
 
           if (!newTemplate || !newTemplate.S) {
             newTemplate = documentM.template = new (js.get(templateId))({
@@ -476,6 +601,15 @@ export class DocumentItem extends Component {
                 }
               }
             });
+          }
+
+          // clean up
+          const nodeList = document.body.childNodes;
+
+          if (nodeList.length > 2) {
+            while (nodeList[3]) {
+              nodeList[3].remove();
+            }
           }
 
           if (2 === doc.mode) {
