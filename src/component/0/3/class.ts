@@ -65,8 +65,6 @@ export class Recaptcha extends Component {
     })
       .then((res) => {
         if (this.S) {
-          res.status = true;
-
           if (res && res.status) {
             this.confirmed = true;
             this.element.remove();
