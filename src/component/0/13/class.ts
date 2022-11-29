@@ -4,7 +4,7 @@ import { Recaptcha } from "../3/class";
 export type FromValidityManagerOptions = InitOptions & {
   form: HTMLFormElement
   button: HTMLButtonElement
-  submit: (formData: FormData) => Promise<void>
+  submit: (instance: FromValidityManager, formData: FormData) => Promise<void>
   items: Array<{
     type: "text" | "recaptcha"
     input: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
@@ -15,7 +15,7 @@ export class FromValidityManager extends Component {
   form: HTMLFormElement
   button: HTMLButtonElement
   readonly items: Array<ValidityManager> = []
-  submit: (formData: FormData) => Promise<void>
+  submit: (instance: FromValidityManager, formData: FormData) => Promise<void>
 
   constructor(options: FromValidityManagerOptions) {
     super({
@@ -29,7 +29,7 @@ export class FromValidityManager extends Component {
 
     formE.addEventListener("submit", (event) => {
       event.preventDefault();
-      console.log("check:", this.check());
+
       if (this.check()) {
         const formData = new FormData;
 
@@ -55,8 +55,9 @@ export class FromValidityManager extends Component {
           }
         }
 
+
         Promise.all([
-          this.submit(new FormData),
+          this.submit(this, formData),
           new Promise((resolve) => {
             const win = this.window!;
 
@@ -73,9 +74,15 @@ export class FromValidityManager extends Component {
               .catch(resolve);
           }),
         ])
-          .then(() => {
+          .finally(() => {
             if (this.S) {
-              this.reset();
+              this.button.classList.remove("c23");
+
+              this.items.forEach(item => item.clear());
+              this.check();
+              this.button.disabled = true;
+
+              this.window!.css.detach(this, 23);
             }
           });
       } else {
@@ -113,10 +120,7 @@ export class FromValidityManager extends Component {
   }
 
   reset(): void {
-    this.button.classList.remove("c23");
     this.items.forEach(item => item.reset());
-    this.button.disabled = false;
-    this.check();
   }
 }
 
@@ -125,6 +129,7 @@ interface ValidityManager {
   error: string | null
   input: HTMLInputElement | HTMLTextAreaElement | Recaptcha
   check(): boolean
+  clear(): void
   reset(): void
 }
 
@@ -157,8 +162,12 @@ export class RecaptchaValidityManager extends Component implements ValidityManag
     return !(this.error = input.confirmed || "string" === typeof input.value ? null : "「ロボットではありません」にチェックして下さい。");
   }
 
-  reset(): void {
+  clear(): void {
     this.input.reset();
+  }
+
+  reset(): void {
+    this.clear();
   }
 }
 
@@ -191,26 +200,14 @@ export class InputValidityManager extends Component implements ValidityManager {
     this.check(!inputE.value.length);
   }
 
-  reset(): void {
+  clear(): void {
     this.error = null;
     this.element.remove();
   }
 
-  update() {
-    const containerE = this.input.parentNode!;
-    const error = this.error;
-    const element = this.element;
-    const isContains = element.parentNode;
-
-    (element.firstChild as Text).data = error ? error : "";
-
-    if (error && !isContains) {
-      containerE.appendChild(element);
-
-    } else if (!error && isContains) {
-      element.remove();
-
-    }
+  reset(): void {
+    const inputE = this.input;
+    inputE.value = inputE.defaultValue;
   }
 
   check(skipUpdate: boolean = false): boolean {
@@ -248,7 +245,22 @@ export class InputValidityManager extends Component implements ValidityManager {
 
     this.error = error;
 
-    if (!skipUpdate) this.update();
+    if (!skipUpdate) {
+      const containerE = this.input.parentNode!;
+      const error = this.error;
+      const element = this.element;
+      const isContains = element.parentNode;
+
+      (element.firstChild as Text).data = error ? error : "";
+
+      if (error && !isContains) {
+        containerE.appendChild(element);
+
+      } else if (!error && isContains) {
+        element.remove();
+
+      }
+    }
 
     return !error;
   }
