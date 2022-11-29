@@ -23,7 +23,9 @@ type StyleEntryList = Array<StyleEntry>
 
 type MinSize = "360" | "480" | "768" | "1024"
 type MinToken = `min${MinSize}`
-type StyleType = "global" | "hover" | MinToken | "light" | "dark" | "hover:light" | "hover:dark";
+type MaxSize = "359" | "479" | "767" | "1023"
+type MaxToken = `max${MaxSize}`
+type StyleType = "global" | "hover" | MinToken | MaxToken | "light" | "dark" | "hover:light" | "hover:dark" | "motion";
 
 type PromiseMap = {
   [key: string]: Promise<void> | undefined
@@ -70,7 +72,10 @@ export class CSS extends Component {
       P: options.P,
     });
 
-    const changeListener: EventListener = () => this.build();
+    const changeListener: EventListener = () => {
+      this.emit!("resize");
+      this.build();
+    }
 
     const cssText = this.element!.textContent;
 
@@ -105,7 +110,7 @@ export class CSS extends Component {
     });
   }
 
-  load(ids: StyleId | StyleIdList): Promise<void> {
+  load(ids: StyleId | StyleIdList): Promise<StyleIdList> {
     return new Promise((resolve, reject) => {
       if (!Array.isArray(ids)) ids = [ids];
 
@@ -126,22 +131,30 @@ export class CSS extends Component {
                 if (this.S) {
                   const blockPositions: Array<number> = [];
 
+                  // TODO:
+                  // "@media (prefers-reduced-motion:no-preference){",
+                  // => animationをしても問題がない
                   [
                     "@media screen and (min-width:360px){",
                     "@media screen and (min-width:480px){",
                     "@media screen and (min-width:768px){",
                     "@media screen and (min-width:1024px){",
+                    "@media screen and (max-width:359px){",
+                    "@media screen and (max-width:479px){",
+                    "@media screen and (max-width:767px){",
+                    "@media screen and (max-width:1023px){",
                     "@media (hover:hover) and (prefers-color-scheme:light){",
                     "@media (hover:hover) and (prefers-color-scheme:dark){",
                     "@media (prefers-color-scheme:light){",
                     "@media (prefers-color-scheme:dark){",
                     "@media (hover:hover){",
+                    "@media (prefers-reduced-motion:no-preference){",
                   ].forEach((prefix: string) => {
                     const position = cssText.indexOf(prefix);
                     if (-1 !== position) blockPositions.push(position);
                   });
 
-                  blockPositions.sort();
+                  blockPositions.sort((a, b) => a - b);
 
                   const cssTextList: Array<CSSText> = [];
 
@@ -183,6 +196,10 @@ export class CSS extends Component {
                         }
 
                         position = [start, -1,];
+                      } else if ("r" === char35[16]) {
+                        type = "motion";
+                        position = [46, -1,];
+
                       } else if ("p" === char35[8]) {
                         if ("l" === char35[29]) {
                           type = "light";
@@ -197,15 +214,13 @@ export class CSS extends Component {
                         const size = parseInt(char35.slice(-6), 10);
 
                         switch (size) {
-                          case 360:
-                          case 480:
-                          case 768:
-                            position = [36, -1,];
+                          case 1023:
+                          case 1024:
+                            position = [37, -1,];
                             break;
 
                           default:
-                            // case 1024:
-                            position = [37, -1,];
+                            position = [36, -1,];
                             break;
                         }
 
@@ -233,7 +248,7 @@ export class CSS extends Component {
           }));
         }
       }))
-        .then(() => resolve())
+        .then(() => resolve(ids as StyleIdList))
         .catch((err) => {
           if (this.S) {
             console.error(err);
@@ -273,55 +288,67 @@ export class CSS extends Component {
     if (hasChange && (options && true === options.build)) this.build();
   }
 
-  build(): void {
-    const styleE = this.element;
+  build(debounce: boolean = false): void {
+    clearTimeout(this.T[0]);
 
-    const textMap: BuildCSSTextMap = {};
+    if (true === debounce) {
+      this.T[0] = setTimeout(() => this.build(), 500);
+    } else {
+      const styleE = this.element;
 
-    this.entries.forEach((entry) => {
-      const cacheEntry = this.caches[entry.id];
+      const textMap: BuildCSSTextMap = {};
 
-      if (cacheEntry) {
-        cacheEntry.styles.forEach((entry) => {
-          const type = entry.type;
-          if ("string" !== typeof textMap[type]) textMap[type] = "";
-          textMap[type] += entry.text;
-        });
-      }
-    });
+      this.entries.forEach((entry) => {
+        const cacheEntry = this.caches[entry.id];
 
-    const isDark = document.documentElement.classList.contains("t2");
+        if (cacheEntry) {
+          cacheEntry.styles.forEach((entry) => {
+            const type = entry.type;
+            if ("string" !== typeof textMap[type]) textMap[type] = "";
+            textMap[type] += entry.text;
+          });
+        }
+      });
 
-    let allCSSText = "";
+      const isDark = document.documentElement.classList.contains("t2");
+      const isReduceMotion = document.documentElement.classList.contains("r1");
 
-    for (let a = [
-      ["global", ""],
-      ["min360", "screen and (min-width:360px)",],
-      ["min480", "screen and (min-width:480px)",],
-      ["min768", "screen and (min-width:768px)",],
-      ["min1024", "screen and (min-width:1024px)",],
-      ["hover", "(hover:hover)"],
-      ["light", !isDark],
-      ["dark", isDark],
-      ["hover:light", isDark ? false : "(hover:hover)"],
-      ["hover:dark", !isDark ? false : "(hover:hover)"],
-    ], i = 0; a.length > i; i++) {
-      let entry = a[i];
-      let type: StyleType = entry[0] as StyleType;
-      let cssTextOrUndefined = textMap[type];
+      let allCSSText = "";
 
-      if ("string" === typeof cssTextOrUndefined) {
-        let cssText: CSSText = cssTextOrUndefined;
-        let mediaQuery = entry[1];
+      for (let a = [
+        ["global", ""],
+        ["min360", "screen and (min-width:360px)",],
+        ["min480", "screen and (min-width:480px)",],
+        ["min768", "screen and (min-width:768px)",],
+        ["min1024", "screen and (min-width:1024px)",],
+        ["max359", "screen and (max-width:359px)",],
+        ["max479", "screen and (max-width:479px)",],
+        ["max767", "screen and (max-width:767px)",],
+        ["max1023", "screen and (max-width:1023px)",],
+        ["hover", "(hover:hover)"],
+        ["light", !isDark],
+        ["dark", isDark],
+        ["hover:light", isDark ? false : "(hover:hover)"],
+        ["hover:dark", !isDark ? false : "(hover:hover)"],
+        ["motion", !isReduceMotion],
+      ], i = 0; a.length > i; i++) {
+        let entry = a[i];
+        let type: StyleType = entry[0] as StyleType;
+        let cssTextOrUndefined = textMap[type];
 
-        if ("boolean" === typeof mediaQuery ? mediaQuery : !(mediaQuery && !matchMedia(mediaQuery).matches)) {
-          allCSSText += cssText;
+        if ("string" === typeof cssTextOrUndefined) {
+          let cssText: CSSText = cssTextOrUndefined;
+          let mediaQuery = entry[1];
+
+          if ("boolean" === typeof mediaQuery ? mediaQuery : !(mediaQuery && !matchMedia(mediaQuery).matches)) {
+            allCSSText += cssText;
+          }
         }
       }
-    }
 
-    if (styleE.textContent !== allCSSText) {
-      styleE.innerHTML = allCSSText;
+      if (styleE.textContent !== allCSSText) {
+        styleE.innerHTML = allCSSText;
+      }
     }
   }
 
