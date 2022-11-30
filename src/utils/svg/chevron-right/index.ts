@@ -1,0 +1,1 @@
+export { SVGChevronRightElementJSON } from "./object"
