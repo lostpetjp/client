@@ -1,6 +1,6 @@
 export const SVGChevronDownElementJSON = {
   attribute: {
-    viewBox: "0 0 48 48",
+    viewBox: "0 0 24 24",
   },
   children: {
     attribute: {
