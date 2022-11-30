@@ -35,16 +35,22 @@ export class DocTemplate extends Component implements Template {
   }
 
   create(): void {
+    const mainE = this.element = document.createElement("main");
+    mainE.className = "d2a";
+
     const articleE = this.article = document.createElement("article");
+    articleE.className = "c7 c9 d2a1";
+    mainE.appendChild(articleE);
 
     const headerE = this.header = document.createElement("header");
     articleE.appendChild(headerE);
 
     const headingE = this.heading = document.createElement("h1");
     headingE.className = "c1";
-    headerE.appendChild(headingE);
 
-    const descriptionE = this.description = headingE.nextSibling as HTMLElement;
+    const descriptionE = this.description = document.createElement("p");
+
+    headerE.append(headingE, descriptionE);
   }
 
   parse(): void {
