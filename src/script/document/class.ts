@@ -524,7 +524,7 @@ export class DocumentItem extends Component {
           const css = win.css!;
           const data = res![0] as DocumentData;
           const template = doc.template!;
-          const templateE = doc.main = template.element!;
+          const templateE = template.element!;
           const content = this.content!;
 
           // create template style
@@ -546,19 +546,15 @@ export class DocumentItem extends Component {
 
           css.build();
 
-          // SSR => SPA
-          if (2 === doc.mode) {
-            document.head.querySelectorAll("link[href^='/styles/']").forEach(element => element.remove());
-          }
-
           // connect content to template
           template.build();
 
           // connect DOM
-          if (4 > template.readyState) {
+          if (4 > template.readyState && 1 === doc.mode) {
             const mainE = doc.main!;
 
-            if (mainE !== templateE) doc.body!.replaceChild(templateE, doc.main = mainE);
+            mainE.setAttribute("role", "main");
+            doc.body!.replaceChild(templateE, doc.main = mainE);
 
             template.readyState = 4;
           }
