@@ -21,7 +21,7 @@ type StyleEntry = {
 
 type StyleEntryList = Array<StyleEntry>
 
-type MinSize = "360" | "480" | "768" | "1024"
+type MinSize = "360" | "480" | "600" | "768" | "1024" | "1280"
 type MinToken = `min${MinSize}`
 type MaxSize = "359" | "479" | "767" | "1023"
 type MaxToken = `max${MaxSize}`
@@ -101,8 +101,10 @@ export class CSS extends Component {
     [
       "360",
       "480",
+      "600",
       "768",
       "1024",
+      "1280",
     ].forEach((size) => {
       matchMedia("screen and (min-width:" + size + "px)").addEventListener("change", changeListener, {
         passive: true,
@@ -137,8 +139,10 @@ export class CSS extends Component {
                   [
                     "@media screen and (min-width:360px){",
                     "@media screen and (min-width:480px){",
+                    "@media screen and (min-width:600px){",
                     "@media screen and (min-width:768px){",
                     "@media screen and (min-width:1024px){",
+                    "@media screen and (min-width:1280px){",
                     "@media screen and (max-width:359px){",
                     "@media screen and (max-width:479px){",
                     "@media screen and (max-width:767px){",
@@ -216,6 +220,7 @@ export class CSS extends Component {
                         switch (size) {
                           case 1023:
                           case 1024:
+                          case 1280:
                             position = [37, -1,];
                             break;
 
@@ -346,8 +351,10 @@ export class CSS extends Component {
         ["global", ""],
         ["min360", "screen and (min-width:360px)",],
         ["min480", "screen and (min-width:480px)",],
+        ["min600", "screen and (min-width:600px)",],
         ["min768", "screen and (min-width:768px)",],
         ["min1024", "screen and (min-width:1024px)",],
+        ["min1280", "screen and (min-width:1280px)",],
         ["max359", "screen and (max-width:359px)",],
         ["max479", "screen and (max-width:479px)",],
         ["max767", "screen and (max-width:767px)",],
