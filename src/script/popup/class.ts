@@ -164,7 +164,7 @@ export class Popup extends Component {
           if (this.S) {
             const isLayer = options.layer;
             const newItem = new constructor(options);
-            console.log("isLayer:", options, isLayer);
+
             if (isLayer) {
               newItem.layer = new PopupLayer({
                 P: newItem,
