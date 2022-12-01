@@ -1,6 +1,7 @@
 import { TermsContent } from "./class"
 
 export default {
-  type: "lostpetjp",
+  scope: "lostpetjp",
+  type: "class",
   component: TermsContent,
 }
