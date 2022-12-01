@@ -21,9 +21,9 @@ type StyleEntry = {
 
 type StyleEntryList = Array<StyleEntry>
 
-type MinSize = "360" | "480" | "600" | "768" | "1024" | "1280"
+type MinSize = "360" | "480" | "600" | "768" | "1024" | "1120" | "1280"
 type MinToken = `min${MinSize}`
-type MaxSize = "359" | "479" | "767" | "1023"
+type MaxSize = "359" | "479" | "599" | "767" | "1023" | "1119" | "1279"
 type MaxToken = `max${MaxSize}`
 type StyleType = "global" | "hover" | MinToken | MaxToken | "light" | "dark" | "hover:light" | "hover:dark" | "motion";
 
@@ -104,6 +104,7 @@ export class CSS extends Component {
       "600",
       "768",
       "1024",
+      "1120",
       "1280",
     ].forEach((size) => {
       matchMedia("screen and (min-width:" + size + "px)").addEventListener("change", changeListener, {
@@ -142,11 +143,14 @@ export class CSS extends Component {
                     "@media screen and (min-width:600px){",
                     "@media screen and (min-width:768px){",
                     "@media screen and (min-width:1024px){",
+                    "@media screen and (min-width:1120px){",
                     "@media screen and (min-width:1280px){",
                     "@media screen and (max-width:359px){",
                     "@media screen and (max-width:479px){",
                     "@media screen and (max-width:767px){",
                     "@media screen and (max-width:1023px){",
+                    "@media screen and (max-width:1119px){",
+                    "@media screen and (max-width:1279px){",
                     "@media (hover:hover) and (prefers-color-scheme:light){",
                     "@media (hover:hover) and (prefers-color-scheme:dark){",
                     "@media (prefers-color-scheme:light){",
@@ -220,6 +224,9 @@ export class CSS extends Component {
                         switch (size) {
                           case 1023:
                           case 1024:
+                          case 1119:
+                          case 1120:
+                          case 1279:
                           case 1280:
                             position = [37, -1,];
                             break;
@@ -354,11 +361,14 @@ export class CSS extends Component {
         ["min600", "screen and (min-width:600px)",],
         ["min768", "screen and (min-width:768px)",],
         ["min1024", "screen and (min-width:1024px)",],
+        ["min1120", "screen and (min-width:1120px)",],
         ["min1280", "screen and (min-width:1280px)",],
-        ["max359", "screen and (max-width:359px)",],
-        ["max479", "screen and (max-width:479px)",],
-        ["max767", "screen and (max-width:767px)",],
+        ["max1279", "screen and (max-width:1279px)",],
+        ["max1119", "screen and (max-width:1119px)",],
         ["max1023", "screen and (max-width:1023px)",],
+        ["max767", "screen and (max-width:767px)",],
+        ["max479", "screen and (max-width:479px)",],
+        ["max359", "screen and (max-width:359px)",],
         ["hover", "(hover:hover)"],
         ["light", !isDark],
         ["dark", isDark],
