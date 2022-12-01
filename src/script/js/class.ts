@@ -53,16 +53,20 @@ export class JS extends Component {
                 let component;
                 const type = moduleDefault.type;
 
-                if ("lostpetjp" === type) {
-                  component = moduleDefault.component;
-                  this.caches[id] = component;
-                  this.window!.factory.create(component);
+                if ("lostpetjp" === moduleDefault.scope) {
+                  const moduleComponent = moduleDefault.component;
 
-                  moduleDefault.plugins?.forEach((component: ExtendsTarget) => {
-                    this.window!.factory.create(component);
-                  });
-                } else if ("function" === type) {
-                  component = this.caches[id] = moduleDefault.component;
+                  if ("class" === type) {
+                    let components = moduleComponent;
+                    if (!Array.isArray(components)) components = [components];
+                    component = this.caches[id] = components[0];
+
+                    components.forEach((component: ExtendsTarget) => {
+                      this.window!.factory.create(component);
+                    });
+                  } else if ("function" === type || "object" === type) {
+                    component = this.caches[id] = moduleComponent;
+                  }
 
                 } else {
                   throw "error!!!!!!!TODO";
