@@ -2,6 +2,7 @@ import { ContactContent } from "./class"
 
 export default {
   js: [13,],
-  type: "lostpetjp",
+  scope: "lostpetjp",
+  type: "class",
   component: ContactContent,
 }
