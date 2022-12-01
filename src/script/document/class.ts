@@ -550,21 +550,18 @@ export class DocumentItem extends Component {
           template.build();
 
           // connect DOM
-          if (4 > template.readyState && 1 === doc.mode) {
-            const mainE = doc.main!;
+          if (4 > template.readyState) {
+            if (1 === doc.mode) {
+              const mainE = doc.main!;
+              mainE.setAttribute("role", "main");
+              doc.body!.replaceChild(templateE, doc.main = mainE);
+            }
 
-            mainE.setAttribute("role", "main");
-            doc.body!.replaceChild(templateE, doc.main = mainE);
+            if ("function" === typeof template.attach) {
+              template.attach();
+            }
 
             template.readyState = 4;
-          }
-
-          if ("function" === typeof template.attach) {
-            template.attach();
-          }
-
-          if ("function" === typeof content.attach) {
-            content.attach();
           }
 
           // scroll position
@@ -575,6 +572,10 @@ export class DocumentItem extends Component {
           // update location
           if (location.pathname !== data.pathname || location.search !== data.search) {
             history.replaceState(history.state, document.title, "https://" + location.hostname + data.pathname + data.search);
+          }
+
+          if ("function" === typeof content.attach) {
+            content.attach();
           }
 
           // update document.head
@@ -603,14 +604,12 @@ export class DocumentItem extends Component {
           const nodeList = document.body.childNodes;
 
           if (nodeList.length > 2) {
-            while (nodeList[3]) {
-              nodeList[3].remove();
-            }
+            while (nodeList[3]) nodeList[3].remove();
           }
 
-          if (2 === doc.mode) {
-            doc.mode = 1;
-          }
+          if (2 === doc.mode) doc.mode = 1;
+
+          this.P!.emit!("load");
         }
       })
       .catch((err) => {
