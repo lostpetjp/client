@@ -2,6 +2,7 @@ import { DrawerItemLeft, DrawerItemLeftStyleIdList } from "./class"
 
 export default {
   css: DrawerItemLeftStyleIdList,
-  type: "lostpetjp",
+  scope: "lostpetjp",
+  type: "class",
   component: DrawerItemLeft,
 }
