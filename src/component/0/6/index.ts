@@ -2,6 +2,7 @@ import { PopupItemStyleIdList, PopupItem } from "./class"
 
 export default {
   css: PopupItemStyleIdList,
-  type: "lostpetjp",
+  scope: "lostpetjp",
+  type: "class",
   component: PopupItem,
 }
