@@ -2,6 +2,7 @@ import { DrawerItemFullpage, DrawerItemFullpageStyleIdList } from "./class"
 
 export default {
   css: DrawerItemFullpageStyleIdList,
-  type: "lostpetjp",
+  scope: "lostpetjp",
+  type: "class",
   component: DrawerItemFullpage,
 }
