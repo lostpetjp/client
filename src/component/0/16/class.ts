@@ -1,9 +1,16 @@
-import { AnimalItem, AnimalMap } from "../../../types/animal";
-import { MatterItem, MatterMap } from "../../../types/matter";
-import { PrefectureItem, PrefectureMap } from "../../../types/prefecture";
+import { AnimalItem, AnimalMap, SearchAnimalId } from "../../../types/animal";
+import { MatterItem, MatterMap, SearchMatterId } from "../../../types/matter";
+import { PrefectureItem, PrefectureMap, SearchPrefectureId } from "../../../types/prefecture";
+import { SearchSortId } from "../../../types/sort";
 import { SearchLocationObject } from "../14/class";
 
 export interface SearchUrlObject {
+  parse(pathname: string, data: {
+    matter?: MatterMap
+    animal?: AnimalMap
+    prefecture?: PrefectureMap
+  }): SearchLocationObject
+
   create(options: SearchLocationObject, data: {
     matter?: MatterMap
     animal?: AnimalMap
@@ -12,8 +19,55 @@ export interface SearchUrlObject {
 }
 
 export const SearchUrl = {
-  parse: (pathname: string) => {
-    //
+  parse: (pathname: string, data: {
+    matter?: MatterMap
+    animal?: AnimalMap
+    prefecture?: PrefectureMap
+  }): SearchLocationObject => {
+    const object = {
+      matter: 0 as SearchMatterId,
+      animal: 0 as SearchAnimalId,
+      prefecture: 0 as SearchPrefectureId,
+      sort: 0 as SearchSortId,
+      page: 1,
+    };
+
+    const matterMap = data.matter!;
+    const animalMap = data.animal!;
+    const prefectureMap = data.prefecture!;
+
+    const find = (pathname: string, map: MatterMap | AnimalMap | PrefectureMap): void | MatterItem | AnimalItem | PrefectureItem => {
+      for (let id in map) {
+        const item = map[id];
+
+        if (-1 !== pathname.indexOf(item.name) && item.search) {
+          return item;
+        }
+      }
+    };
+
+    const matter = find(pathname, matterMap);
+    if (matter) object.matter = matter.id as SearchMatterId;
+
+    const animal = find(pathname, animalMap);
+    if (animal) object.animal = animal.id as SearchAnimalId;
+
+    const prefecture = find(pathname, prefectureMap);
+    if (prefecture) object.prefecture = prefecture.id as SearchPrefectureId;
+
+    if (-1 !== pathname.indexOf("new")) {
+      object.sort = 1 as SearchSortId;
+    }
+
+    const matches = pathname.match(/\/([0-9]+)/);
+
+    if (matches) {
+      object.page = parseInt(matches[1], 10);
+    }
+
+    if (2 > object.page) object.page = 1;
+
+    return object;
   },
 
   create: (options: SearchLocationObject, data: {
@@ -31,34 +85,19 @@ export const SearchUrl = {
     const animalMap = data.animal!;
     const prefectureMap = data.prefecture!;
 
-    let matter, animal, prefecture;
+    const find = (id: number, map: MatterMap | AnimalMap | PrefectureMap): void | MatterItem | AnimalItem | PrefectureItem => {
+      for (let key in map) {
+        const item = map[key];
 
-    for (let key in matterMap) {
-      const item = (matterMap[key] as MatterItem);
-
-      if (item.id === matterId && item.search) {
-        matter = item;
-        break;
+        if (item.id === id && item.search) {
+          return item;
+        }
       }
-    }
+    };
 
-    for (let key in animalMap) {
-      const item = (animalMap[key] as AnimalItem);
-
-      if (item.id === animalId && item.search) {
-        animal = item;
-        break;
-      }
-    }
-
-    for (let key in prefectureMap) {
-      const item = (prefectureMap[key] as PrefectureItem);
-
-      if (item.id === prefectureId && item.search) {
-        prefecture = item;
-        break;
-      }
-    }
+    const matter = find(matterId, matterMap);
+    const animal = find(animalId, animalMap);
+    const prefecture = find(prefectureId, prefectureMap);
 
     return "/search/" + [
       matter ? matter.name : null,
@@ -69,24 +108,3 @@ export const SearchUrl = {
     ].filter((token: string | number | null) => token).join("/");
   }
 }
-
-/*
-// "/search/lost/dog/tokyo/new/"
-    $matter_id = $object["matter"];
-    $animal_id = $object["animal"];
-    $prefecture_id = $object["prefecture"];
-    $sort_id = $object["sort"];
-    $page_id = $object["page"];
-
-    $matter = $matter_id ? array_filter(Matter::$data, fn (array $entry) => $entry["search"])[$matter_id] ?? Matter::$data[99] : null;
-    $animal = $animal_id ? array_filter(Animal::$data, fn (array $entry) => $entry["search"])[$animal_id] ?? Animal::$data[99] : null;
-    $prefecture = $prefecture_id ? array_filter(Prefecture::$data, fn (array $entry) => $entry["search"])[$prefecture_id] ?? Prefecture::$data[99] : null;
-
-    return "/search/" . implode("/", array_filter([
-      $matter ? $matter["name"] : null,
-      $animal ? $animal["name"] : null,
-      $prefecture ? $prefecture["name"] : null,
-      $sort_id ? "new" : null,
-      $page_id > 1 ? $page_id : null,
-    ], fn (string|int|null $token) => $token));
-*/
