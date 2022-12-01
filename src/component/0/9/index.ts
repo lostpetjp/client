@@ -1,6 +1,7 @@
 import { ColorSchemeChange } from "./class"
 
 export default {
-  type: "lostpetjp",
+  scope: "lostpetjp",
+  type: "class",
   component: ColorSchemeChange,
 }
