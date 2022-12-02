@@ -2,9 +2,10 @@ import { Component, InitOptions } from "../..";
 
 type Options = InitOptions & {
   handle: HTMLElement
+  threshold?: number
 }
 
-type Position = {
+export type PointerPosition = {
   type: "touch" | "mouse"
   clientX: number,
   clientY: number,
@@ -12,14 +13,23 @@ type Position = {
   pageY: number,
 }
 
+export type DraggerEvent = PointerPosition & {
+  originalEvent: MouseEvent | TouchEvent
+  metaKey: boolean
+  shiftKey: boolean
+  origin?: PointerPosition
+  moveX?: number
+  moveY?: number
+}
+
 export class Dragger extends Component {
   disabled: boolean = false
   handle: HTMLElement
   threshold: number = 3
   readyState: 0 | 1 = 0
-  origin: Position | null = null
+  origin: PointerPosition | null = null
 
-  getPosition(event: MouseEvent | TouchEvent): void | Position {
+  getPosition(event: MouseEvent | TouchEvent): void | PointerPosition {
     if (event) {
       const changedTouches = !(event instanceof MouseEvent) ? event.changedTouches : null;
       const position = changedTouches ? (changedTouches[0] as Touch) : (event as MouseEvent);
@@ -38,16 +48,9 @@ export class Dragger extends Component {
     const nowPosition = this.getPosition(event);
 
     if (nowPosition) {
-      const response: Position & {
-        event: MouseEvent | TouchEvent
-        metaKey: boolean
-        shiftKey: boolean
-        origin?: Position
-        moveX?: number
-        moveY?: number
-      } = {
+      const response: DraggerEvent = {
         ...{
-          event: event,
+          originalEvent: event,
           metaKey: event.metaKey,
           shiftKey: event.shiftKey,
         },
@@ -88,7 +91,7 @@ export class Dragger extends Component {
     }
   }
 
-  dragStart: (event: MouseEvent | TouchEvent) => void = (event: MouseEvent | TouchEvent) => {
+  dragStart: (event: MouseEvent | TouchEvent) => void = (event: MouseEvent | TouchEvent): void => {
     const isMouse = event instanceof MouseEvent;
 
     if (this.S && !(isMouse && 2 === event.button) && !this.disabled) {
@@ -119,7 +122,7 @@ export class Dragger extends Component {
     }
   }
 
-  drag: (event: MouseEvent | TouchEvent) => void = (event: MouseEvent | TouchEvent) => {
+  drag: (event: MouseEvent | TouchEvent) => void = (event: MouseEvent | TouchEvent): void => {
     if (this.S) {
       if (this.disabled || !(1 & this.readyState)) {
         return this.dragEnd(event);
@@ -129,7 +132,7 @@ export class Dragger extends Component {
     }
   }
 
-  dragEnd: (event: MouseEvent | TouchEvent) => void = (event: MouseEvent | TouchEvent) => {
+  dragEnd: (event: MouseEvent | TouchEvent) => void = (event: MouseEvent | TouchEvent): void => {
     if (this.S) {
       this.dispatch("dragend", event);
 
@@ -152,6 +155,10 @@ export class Dragger extends Component {
     });
 
     const handleE = this.handle = options.handle;
+
+    if ("number" === typeof options.threshold) {
+      this.threshold = options.threshold;
+    }
 
     handleE.addEventListener("mousedown", this.dragStart, {
       passive: false,
