@@ -553,8 +553,8 @@ export class DocumentItem extends Component {
           if (4 > template.readyState) {
             if (1 === doc.mode) {
               const mainE = doc.main!;
-              mainE.setAttribute("role", "main");
-              doc.body!.replaceChild(templateE, doc.main = mainE);
+              templateE.setAttribute("role", "main");
+              doc.body!.replaceChild(doc.main = templateE, mainE);
             }
 
             if ("function" === typeof template.attach) {
@@ -607,9 +607,9 @@ export class DocumentItem extends Component {
             while (nodeList[3]) nodeList[3].remove();
           }
 
-          if (2 === doc.mode) doc.mode = 1;
-
           this.P!.emit!("load");
+
+          if (2 === doc.mode) doc.mode = 1;
         }
       })
       .catch((err) => {
