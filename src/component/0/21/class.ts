@@ -28,6 +28,7 @@ export class SliderModal extends Component {
       P: options.P,
     });
 
+    this.value = value;
     this.max = options.max;
     this.min = options.min;
 
