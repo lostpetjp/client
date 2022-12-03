@@ -52,13 +52,13 @@ export class SearchCount extends Component {
       }) as HTMLDivElement;
     }
 
-    this.dom[1] = backE as HTMLSpanElement | null || element.create({
+    this.dom[1] = (backE as HTMLSpanElement | null) || element.create({
       children: [
         "(",
         {
           attribute: {
             class: "a1",
-            href: "/search/",
+            href: "",
           },
           children: "全部見る",
           tagName: "a",
@@ -68,7 +68,18 @@ export class SearchCount extends Component {
       tagName: "span",
     }) as HTMLSpanElement;
 
-    this.dom[2] = this.dom[1].getElementsByTagName("a")[0];
+    (this.dom[2] = this.dom[1].getElementsByTagName("a")[0]).addEventListener("click", (event) => {
+      event.preventDefault();
+
+      this.window!.document.load({
+        pathname: (event.currentTarget as HTMLAnchorElement).pathname,
+        search: "",
+        type: 1,
+        scroll: {},
+      });
+    }, {
+      passive: false,
+    })
   }
 
   update(object: SearchLocationObject, counts: Array<number>): void {
@@ -82,7 +93,13 @@ export class SearchCount extends Component {
     const isContains = backE.parentNode;
 
     if (hasSearch && !isContains) {
-      (doms[2] as HTMLAnchorElement).href = (this.window!.js.get(16) as SearchUrlObject).create({ ...object, matter: 0 as SearchMatterId, animal: 0 as SearchAnimalId, prefecture: 0 as SearchPrefectureId, page: 1, }, this.P! as SearchTemplate);
+      (doms[2] as HTMLAnchorElement).href = (this.window!.js.get(16) as SearchUrlObject).create({
+        ...object,
+        matter: 0 as SearchMatterId,
+        animal: 0 as SearchAnimalId,
+        prefecture: 0 as SearchPrefectureId,
+        page: 1,
+      }, this.P! as SearchTemplate);
 
       this.element.appendChild(backE);
 
@@ -92,11 +109,3 @@ export class SearchCount extends Component {
     }
   }
 }
-
-/*
-<div class="c25d">
-  <span class="c25d1">1,332</span>
-  件ヒットしました。
-  <span>(<a class="a1" href="/search/">全部見る</a>)</span>
-</div>
-*/
