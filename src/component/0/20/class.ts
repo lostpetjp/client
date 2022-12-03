@@ -24,7 +24,7 @@ export class Slider extends Component {
     const newValue = Math.min(1, Math.max(0, ((value))));
 
     if (oldValue !== newValue) {
-      this.$value = value;
+      this.$value = newValue;
 
       this.emit!("change", {
         value: newValue,
@@ -40,7 +40,7 @@ export class Slider extends Component {
 
   update(): void {
     var oldValue = this.marginLeft;
-    var newValue = (this.$value * 100);
+    var newValue = (this.value * 100);
 
     if (oldValue !== newValue) {
       this.marginLeft = newValue;
@@ -105,7 +105,10 @@ export class Slider extends Component {
 
     const win = this.window!;
     const element = win.element;
+    const css = win.css;
     const js = win.js;
+
+    css.attach(this, [28,]);
 
     this.element = element.create({
       children: this.body = element.create({
@@ -128,9 +131,9 @@ export class Slider extends Component {
       handle: this.element,
       threshold: 0,
       on: {
-        dragStart: this.dragStart,
+        dragstart: this.dragStart,
         drag: this.drag,
-        dragEnd: this.dragEnd,
+        dragend: this.dragEnd,
       },
       P: this,
     });
