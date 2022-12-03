@@ -54,10 +54,23 @@ export class SearchSort extends Component {
 
     }
 
-    this.dom = [
+    (this.dom = [
       rootE.getElementsByClassName("c25b1b")[0] as HTMLAnchorElement,
       rootE.getElementsByClassName("c25b1c")[0] as HTMLAnchorElement,
-    ];
+    ]).forEach((aE) => {
+      aE.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        this.window!.document.load({
+          pathname: (event.currentTarget as HTMLAnchorElement).pathname,
+          search: "",
+          type: 1,
+          scroll: {},
+        })
+      }, {
+        passive: false,
+      })
+    });
   }
 
   update(object: LocationObject) {
