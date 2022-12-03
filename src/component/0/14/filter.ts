@@ -62,6 +62,8 @@ export class SearchFilter extends Component {
       }) as HTMLUListElement;
     }
 
+    win.document.attach(rootE);
+
     const childNodes = rootE.getElementsByClassName("c25a1a");
     this.matter = childNodes[0] as HTMLAnchorElement;
     this.animal = childNodes[1] as HTMLAnchorElement;
