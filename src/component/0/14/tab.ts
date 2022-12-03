@@ -21,6 +21,7 @@ export class SearchTab extends Component {
 
     if (options.element) {
       this.element = options.element;
+      this.dom = Array.from(this.element.getElementsByClassName("c25e1a")) as Array<HTMLAnchorElement>;
 
     } else {
       this.element = element.create({
@@ -56,6 +57,22 @@ export class SearchTab extends Component {
         tagName: "ul",
       }) as HTMLUListElement
     }
+
+    this.dom.forEach((aE) => {
+      aE.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        this.window!.document.load({
+          pathname: (event.currentTarget as HTMLAnchorElement).pathname,
+          search: "",
+          type: 1,
+          scroll: {},
+        });
+      }, {
+        passive: false,
+      });
+    });
+
   }
 
   update(object: SearchLocationObject, counts: Array<number>): void {
@@ -63,9 +80,9 @@ export class SearchTab extends Component {
     const doms = this.dom;
     const searchUrl = this.window!.js.get(16) as SearchUrlObject;
 
-    doms[0].href = searchUrl.create({ ...object, matter: 0, }, root);
-    doms[1].href = searchUrl.create({ ...object, matter: 1, }, root);
-    doms[2].href = searchUrl.create({ ...object, matter: 2, }, root);
+    doms[0].href = searchUrl.create({ ...object, page: 1, matter: 0, }, root);
+    doms[1].href = searchUrl.create({ ...object, page: 1, matter: 1, }, root);
+    doms[2].href = searchUrl.create({ ...object, page: 1, matter: 2, }, root);
 
     doms.forEach((aE: HTMLAnchorElement, index: number) => {
       aE.classList[index === (this.P as SearchTemplate)!.location.matter ? "add" : "remove"]("c25e1s");
