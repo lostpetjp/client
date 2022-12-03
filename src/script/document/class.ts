@@ -13,6 +13,7 @@ import { OpenDrawer } from "../../component/0/11/class";
 
 export type DocumentOptions = InitOptions & {
   data?: DocumentData
+  type: LoadType
 }
 
 export type TemplateId = number
@@ -26,7 +27,10 @@ export type ContentId = number
 export type Mode = 1 | 2;
 
 type Caches = {
-  [key: string]: DocumentData
+  [key: string]: {
+    data: DocumentData
+    created_at: number
+  }
 }
 
 export type ContentData = {
@@ -60,15 +64,19 @@ export type LoadType = 1 | 2 | 3;
 
 export type DocumentLoadOptions = {
   data?: DocumentData
-  type: number
+  pathname?: string
+  search?: string
+  type: LoadType
   scroll?: ScrollToOptions
 }
 
 type DocumentPreloadOptions = {
+  cache: boolean
   pathname?: string
   search?: string
   data?: DocumentData
 }
+
 
 /**
  * Document Manager
@@ -122,8 +130,11 @@ export class DocumentM extends Component {
     const pathname = aE.pathname;
     const search = aE.search;
 
-    if (!DocumentM.caches[pathname + search]) {
+    const cacheItem = DocumentM.caches[pathname + search];
+
+    if (!cacheItem || (Date.now() > ((1000 * 60) + cacheItem.created_at))) {
       this.preload({
+        cache: true,
         pathname: pathname,
         search: search,
       });
@@ -271,7 +282,7 @@ export class DocumentM extends Component {
 
   preload(options: DocumentPreloadOptions): Promise<DocumentData> {
     return new Promise((resolve, reject) => {
-      (options.data ? Promise.resolve(options.data) : this.getInfo(options.pathname!, options.search!))
+      (options.data ? Promise.resolve(options.data) : this.getInfo(options.pathname!, options.search!, options.cache))
         .then((data) => {
           const win = this.window!;
 
@@ -302,6 +313,10 @@ export class DocumentM extends Component {
   }
 
   load(options: DocumentLoadOptions): void {
+    if (options.pathname || options.search) {
+      history.pushState(null, document.title, "https://" + location.hostname + (options.pathname || "") + (options.search + ""));
+    }
+
     const oldDocument = this.item;
 
     let oldSearch = null;
@@ -327,12 +342,12 @@ export class DocumentM extends Component {
     }
   }
 
-  getInfo(pathname: string, search: string): Promise<DocumentData> {
+  getInfo(pathname: string, search: string, cache: boolean): Promise<DocumentData> {
     const newPathname = pathname;
     const newSearch = search;
     const cacheKey = newPathname + newSearch;
-
-    const data = DocumentM.caches[cacheKey];
+    const cacheItem = DocumentM.caches[cacheKey];
+    const data = (cacheItem && (true === cache || ((cacheItem.created_at + (1000 * 10)) > Date.now())) ? cacheItem.data : null);
     if (data) return Promise.resolve(data);
 
     return new Promise((resolve, reject) => {
@@ -348,7 +363,10 @@ export class DocumentM extends Component {
         .then((res) => {
           if (res.status) {
             const data = res.body;
-            DocumentM.caches[cacheKey] = data;
+            DocumentM.caches[cacheKey] = {
+              created_at: Date.now(),
+              data: data,
+            };
 
             resolve(data);
           }
@@ -367,7 +385,7 @@ export class DocumentM extends Component {
     for (let i = 0, a = rootE.getElementsByTagName("a"); a.length > i; i++) {
       let aE = a[i];
 
-      if (aE.href && hostname === aE.hostname) {
+      if (aE.hasAttribute("href") && hostname === aE.hostname) {
         aE.addEventListener("click", this.clickEventListener, {
           passive: false,
         });
@@ -407,29 +425,14 @@ export class DocumentItem extends Component {
     win.dialog.close();
     win.drawer.close();
 
-    //(2 === documentM.mode ? Promise.resolve(options.data!) : documentM.getInfo(newPathname, newSearch))
     documentM.preload(2 === documentM.mode ? {
+      cache: false,
       data: options.data,
     } : {
+      cache: 2 === options.type ? true : false,
       pathname: newPathname,
       search: newSearch,
     })
-      /*
-      // 重複処理のため削除
-        .then((data) => {
-          const win = this.window!;
-  
-          if (this.S) {
-            const templateData = data.template;
-            const contentData = data.content;
-  
-            return Promise.all([
-              data,
-              ...Array.from(new Set([...templateData.css, ...contentData.css])).map((id) => win.css!.load(id)),
-              ...[templateData.component, contentData.component, ...templateData.js, ...contentData.js].map((id) => win.js!.load(id)),
-            ]);
-          }
-        })*/
       .then((data) => {
         const win = this.window!;
         const documentM = this.P!;
