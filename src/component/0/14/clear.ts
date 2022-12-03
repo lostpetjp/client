@@ -12,7 +12,7 @@ type Options = InitOptions & {
 }
 
 export class SearchClear extends Component {
-  element: HTMLDivElement
+  element: HTMLDivElement | null
   container?: HTMLDivElement
 
   constructor(options: Options) {
@@ -23,11 +23,13 @@ export class SearchClear extends Component {
     const win = this.window!;
     const element = win.element;
 
-    if (options.element) {
-      this.element = options.element;
-      this.container = options.container;
+    this.element = options.element!;
 
-    } else {
+    if (options.container) {
+      this.container = options.container;
+    }
+
+    if (!this.element) {
       this.element = element.create({
         attribute: {
           class: "c25c",
@@ -51,6 +53,19 @@ export class SearchClear extends Component {
         tagName: "div",
       }) as HTMLDivElement;
     }
+
+    this.element.firstChild!.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      this.window!.document.load({
+        pathname: (event.currentTarget as HTMLAnchorElement).pathname,
+        search: "",
+        type: 1,
+        scroll: {},
+      });
+    }, {
+      passive: false,
+    });
   }
 
   update(object: SearchLocationObject): void {
@@ -59,18 +74,18 @@ export class SearchClear extends Component {
 
     if (hasSearch) {
       (this.window!.js.get(16) as SearchUrlObject).create({
+        ...object,
         matter: 0,
         animal: 0,
         prefecture: 0,
-        sort: 0,
         page: 1,
       }, this.P! as SearchTemplate);
     }
 
-    if (hasSearch && !element.parentNode) {
-      this.container!.appendChild(this.element);
-    } else if (!hasSearch && element.parentNode) {
-      this.element.remove();
+    if (hasSearch && !element!.parentNode) {
+      this.container!.appendChild(this.element!);
+    } else if (!hasSearch && element!.parentNode) {
+      this.element!.remove();
     }
   }
 }
