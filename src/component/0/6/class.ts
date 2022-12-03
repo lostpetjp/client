@@ -100,7 +100,7 @@ export class PopupItem extends Component {
 
     const closeButtonAE = isToast || isModal ? element.create({
       attribute: {
-        class: "a2 " + (isToast ? "" : "") + " " + (isToast ? "c12b" : "c11a2"),
+        class: "a2 " + (isToast ? "" : "") + " " + (isToast ? "c12b" : "c11a2") + " hb3",
       },
       children: element.create(SVGCloseElementJSON, {
         attribute: {
@@ -287,7 +287,6 @@ export class PopupItem extends Component {
       });
 
     this.on!(this, "destroy", () => {
-      console.log("des");
       const win = this.window!;
 
       this.closeChildren();
