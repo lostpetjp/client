@@ -34,6 +34,7 @@ export class SliderModal extends Component {
 
     const win = this.window!;
     const js = win.js;
+    const css = win.css;
     const element = win.element;
     const SliderC = js.get(20) as typeof Slider;
 
@@ -129,6 +130,8 @@ export class SliderModal extends Component {
       },
       tagName: "div",
     }) as HTMLDivElement;
+
+    css.attach(this, [4, 29,]);
 
     win.popup.create({
       element: this.element,
