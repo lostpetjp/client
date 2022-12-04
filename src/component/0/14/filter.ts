@@ -101,13 +101,14 @@ export class SearchFilter extends Component {
               const map = 1 === type ? data.matter! : (2 === type ? data.animal! : data.prefecture!);
 
               win.popup.create({
+                css: [30,],
                 element: element.create({
                   attribute: {
-                    class: "c25u",
+                    class: "c30",
                   },
                   children: {
                     attribute: {
-                      class: 3 === type ? "c25v" : "c25t",
+                      class: 3 === type ? "c30b" : "c30a",
                     },
                     children: [
                       {
@@ -166,7 +167,7 @@ export class SearchFilter extends Component {
                       return {
                         children: {
                           attribute: {
-                            class: "a2 c25t1a hb2" + (id === (1 === type ? locMatterId : (2 === type ? locAnimalId : locPrefectureId)) ? " c25a1a1s" : "") + (!count ? " c25e1d" : ""),
+                            class: "a2 c30a1a hb2" + (id === (1 === type ? locMatterId : (2 === type ? locAnimalId : locPrefectureId)) ? " c25a1a1s" : "") + (!count ? " c25e1d" : ""),
                             href: (this.window!.js.get(16) as SearchUrlObject).create({
                               matter: matterId as SearchMatterId,
                               animal: animalId as SearchAnimalId,
@@ -179,7 +180,7 @@ export class SearchFilter extends Component {
                             item.title,
                             {
                               attribute: {
-                                class: "c25t1a1",
+                                class: "c30a1a1",
                               },
                               children: ("" + count).replace(/(\d)(?=(\d{3})+\b)/g, "$1,"),
                               tagName: "span",
@@ -246,13 +247,3 @@ export class SearchFilter extends Component {
     prefectureSpanE.classList[prefectureId ? "add" : "remove"]("c25a1a1s");
   }
 }
-
-/*
-
-        
-<li>
-  <a class="a2 c25a1a hb3" role="button">
-    迷子<svg height="12" viewBox="0 0 24 24" width="12"><path d="M2.484 5.699 12 15.215l9.516-9.516a1.456 1.456 0 0 1 2.058 2.057L13.029 18.301a1.455 1.455 0 0 1-2.058 0L.426 7.756a1.455 1.455 0 0 1 2.058-2.057Z" fill="currentColor"></path></svg>
-  </a>
-</li>
-*/
