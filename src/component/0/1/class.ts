@@ -78,18 +78,10 @@ export class DocTemplate extends Component implements Template {
       headingE.textContent = content.title!;
 
       // for description
-      while (descriptionE.firstChild) {
-        descriptionE.firstChild.remove();
-      }
-
-      descriptionE.appendChild(win.element!.create(content.description!));
+      descriptionE.replaceChildren(win.element!.create(content.description!));
 
       // for body
-      while (articleE.childNodes[1]) {
-        articleE.childNodes[1].remove();
-      }
-
-      articleE.appendChild(content.element!);
+      articleE.replaceChildren(articleE.firstChild!, content.element!);
     }
   }
 }
