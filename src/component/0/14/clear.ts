@@ -14,6 +14,7 @@ type Options = InitOptions & {
 export class SearchClear extends Component {
   element: HTMLDivElement | null
   container?: HTMLDivElement
+  anchor: HTMLAnchorElement
 
   constructor(options: Options) {
     super({
@@ -54,7 +55,9 @@ export class SearchClear extends Component {
       }) as HTMLDivElement;
     }
 
-    this.element.firstChild!.addEventListener("click", (event) => {
+    const anchorE = this.anchor = this.element.firstChild! as HTMLAnchorElement;
+
+    anchorE.addEventListener("click", (event) => {
       event.preventDefault();
 
       this.window!.document.load({
@@ -73,7 +76,7 @@ export class SearchClear extends Component {
     const hasSearch = object.matter || object.animal || object.prefecture;
 
     if (hasSearch) {
-      (this.window!.js.get(16) as SearchUrlObject).create({
+      this.anchor.href = (this.window!.js.get(16) as SearchUrlObject).create({
         ...object,
         matter: 0,
         animal: 0,
