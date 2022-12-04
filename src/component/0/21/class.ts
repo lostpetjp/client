@@ -131,7 +131,9 @@ export class SliderModal extends Component {
       tagName: "div",
     }) as HTMLDivElement;
 
-    css.attach(this, [4, 29,]);
+    css.attach(this, [4, 29,], {
+      build: true,
+    });
 
     win.popup.create({
       element: this.element,
