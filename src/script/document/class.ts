@@ -604,11 +604,7 @@ export class DocumentItem extends Component {
           }
 
           // clean up
-          const nodeList = document.body.childNodes;
-
-          if (nodeList.length > 2) {
-            while (nodeList[3]) nodeList[3].remove();
-          }
+          document.body.replaceChildren(doc.header!, doc.body!, doc.footer!);
 
           this.P!.emit!("load");
 
