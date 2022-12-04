@@ -132,7 +132,9 @@ export class Pager extends Component {
       this.max = parseInt(maxStr, 10);
 
     } else {
-      win.css.attach(this, [27,]);
+      win.css.attach(this, [27,], {
+        build: true,
+      });
 
       rootE = this.element = element.create({
         attribute: {
