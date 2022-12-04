@@ -143,6 +143,8 @@ export class Popup extends Component {
       const items = this.items;
       const newId = options.id;
 
+      let someItemClosed = false;
+
       if (items.length) {
         const parentLayer = this.findLayer(options.P!);
 
@@ -154,6 +156,7 @@ export class Popup extends Component {
             const isSameId = newId && oldId === newId;
             if (parentLayer && parentLayer === oldItem.layer) break;
             oldItem.close();
+            someItemClosed = true;
             if (isSameId) return resolve(oldItem);
           }
         }
@@ -163,7 +166,12 @@ export class Popup extends Component {
         .then(([constructor]: [typeof PopupItem]) => {
           if (this.S) {
             const isLayer = options.layer;
-            const newItem = new constructor(options);
+            const newItem = new constructor({
+              ...options,
+              ...(someItemClosed ? {
+                animation: false,
+              } : {}),
+            });
 
             if (isLayer) {
               newItem.layer = new PopupLayer({
