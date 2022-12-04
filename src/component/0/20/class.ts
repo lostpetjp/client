@@ -108,7 +108,9 @@ export class Slider extends Component {
     const css = win.css;
     const js = win.js;
 
-    css.attach(this, [28,]);
+    css.attach(this, [28,], {
+      build: true,
+    });
 
     this.element = element.create({
       children: this.body = element.create({
