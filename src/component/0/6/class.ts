@@ -44,6 +44,7 @@ export type PopupItemToastOptions = PopupItemCoreOptions & {
 
 export type PopupItemModalOptions = PopupItemCoreOptions & {
   title: string
+  large?: boolean
 }
 
 export type PopupItemOptions = PopupItemToastOptions | PopupItemModalOptions | PopupItemCoreOptions
@@ -175,7 +176,7 @@ export class PopupItem extends Component {
 
       nodeJSON = {
         attribute: {
-          class: "c17",
+          class: "c17" + (options.large ? " c17l" : ""),
         },
         children: [
           {
