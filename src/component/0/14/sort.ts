@@ -1,13 +1,10 @@
 import { Component, InitOptions } from "../..";
 import { SearchSortId } from "../../../types/sort";
+import { SearchUrlObject } from "../16/class";
+import { SearchLocationObject, SearchTemplate } from "./class";
 
 type Options = InitOptions & {
   element?: HTMLUListElement
-}
-
-type LocationObject = {
-  sort: SearchSortId
-  [key: string]: any
 }
 
 export class SearchSort extends Component {
@@ -73,11 +70,27 @@ export class SearchSort extends Component {
     });
   }
 
-  update(object: LocationObject) {
+  update(object: SearchLocationObject) {
     const isNew = 1 === object.sort;
 
     const doms = this.dom;
-    doms[0].classList[!isNew ? "add" : "remove"]("c25b1s");
-    doms[1].classList[isNew ? "add" : "remove"]("c25b1s");
+
+    const startE = doms[0];
+    const updateE = doms[1];
+
+    startE.classList[!isNew ? "add" : "remove"]("c25b1s");
+    updateE.classList[isNew ? "add" : "remove"]("c25b1s");
+
+    startE.href = (this.window!.js.get(16) as SearchUrlObject).create({
+      ...object,
+      sort: 0,
+      page: 1,
+    }, this.P! as SearchTemplate);
+
+    updateE.href = (this.window!.js.get(16) as SearchUrlObject).create({
+      ...object,
+      sort: 1,
+      page: 1,
+    }, this.P! as SearchTemplate);
   }
 }
