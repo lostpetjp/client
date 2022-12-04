@@ -1,4 +1,5 @@
 import { CallbackEventData, Component, EventData, InitOptions } from "../..";
+import { StyleIdList } from "../../../script/css";
 import { PopupLayer } from "../../../script/popup";
 import { SVGCheckElementJSON } from "../../../utils/svg/check";
 import { SVGCloseElementJSON } from "../../../utils/svg/close";
@@ -27,6 +28,7 @@ type ToastColor = 1 | 2
 type PopupItemCoreOptions = InitOptions & {
   align?: AlignType
   animation?: boolean
+  css?: StyleIdList
   feature?: FeatureType
   id?: string | number
   layer?: Component
@@ -77,8 +79,10 @@ export class PopupItem extends Component {
     if ("number" === typeof options.align) this.align = options.align;
     if ("number" === typeof options.position) this.position = options.position;
     this.target = options.target;
-    var featureOptions = options.feature;
 
+    const optionStyleIdList = options.css || [];
+
+    const featureOptions = options.feature;
     this.feature = "number" === typeof featureOptions ? featureOptions : (1 | 2 | 4);
 
     const type = options.type;
@@ -101,12 +105,12 @@ export class PopupItem extends Component {
 
     const closeButtonAE = isToast || isModal ? element.create({
       attribute: {
-        class: "a2 " + (isToast ? "" : "") + " " + (isToast ? "c12b" : "c11a2") + " hb3",
+        class: "a2 " + (isToast ? "c12b" : "c11a2") + " hb3",
       },
       children: element.create(SVGCloseElementJSON, {
         attribute: {
-          height: "16",
-          width: "16",
+          height: "12",
+          width: "12",
         },
       }),
       on: {
@@ -239,7 +243,10 @@ export class PopupItem extends Component {
       }
     }
 
-    css.load(addStyleIdList)
+    css.load([
+      ...addStyleIdList,
+      ...optionStyleIdList,
+    ])
       .then((addStyleIdList) => {
         css.attach(this, [
           ...PopupItemStyleIdList,
