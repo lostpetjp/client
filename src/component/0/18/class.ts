@@ -40,7 +40,7 @@ export class SearchItemList extends Component {
         attribute: {
           class: "c26",
         },
-        tagName: "ul",
+        tagName: "div",
       }) as HTMLUListElement;
     }
   }
