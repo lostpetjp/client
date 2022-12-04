@@ -1,5 +1,9 @@
 import { Component, InitOptions } from "../..";
+import { AnimalItem, SearchAnimalId } from "../../../types/animal";
+import { MatterItem, SearchMatterId } from "../../../types/matter";
+import { PrefectureItem, SearchPrefectureId } from "../../../types/prefecture";
 import { SVGChevronDownElementJSON } from "../../../utils/svg/chevron-down";
+import { SearchUrlObject } from "../16/class";
 import { SearchLocationObject, SearchTemplate } from "./class";
 
 type Options = InitOptions & {
@@ -65,9 +69,150 @@ export class SearchFilter extends Component {
     win.document.attach(rootE);
 
     const childNodes = rootE.getElementsByClassName("c25a1a");
-    this.matter = childNodes[0] as HTMLAnchorElement;
-    this.animal = childNodes[1] as HTMLAnchorElement;
-    this.prefecture = childNodes[2] as HTMLAnchorElement;
+    const matterAE = this.matter = childNodes[0] as HTMLAnchorElement;
+    const animalAE = this.animal = childNodes[1] as HTMLAnchorElement;
+    const prefectureAE = this.prefecture = childNodes[2] as HTMLAnchorElement;
+
+    [
+      matterAE,
+      animalAE,
+      prefectureAE,
+    ].forEach((aE) => {
+      aE.addEventListener("mousedown", (event) => event.stopPropagation(), { passive: true, });
+      aE.addEventListener("touchstart", (event) => event.stopPropagation(), { passive: true, });
+
+      aE.addEventListener("click", (event: MouseEvent | TouchEvent) => {
+        event.preventDefault();
+
+        const aE = event.currentTarget as HTMLAnchorElement;
+
+        this.window!.fetch({
+          credentials: false,
+          path: "count",
+          method: "GET",
+        })
+          .then((countInfo) => {
+            if (this.S) {
+              const win = this.window!;
+              const element = win.element;
+              const data = this.P! as SearchTemplate;
+
+              const type = this.matter === aE ? 1 : (this.animal === aE ? 2 : 3);
+              const map = 1 === type ? data.matter! : (2 === type ? data.animal! : data.prefecture!);
+
+              win.popup.create({
+                element: element.create({
+                  attribute: {
+                    class: "c25u",
+                  },
+                  children: {
+                    attribute: {
+                      class: 3 === type ? "c25v" : "c25t",
+                    },
+                    children: [
+                      {
+                        id: 0,
+                        title: "すべて",
+                      },
+                    ].concat(Object.values(map).filter((item: MatterItem | AnimalItem | PrefectureItem) => item.search)).map((item: MatterItem | AnimalItem | PrefectureItem | {
+                      id: number
+                      title: string
+                    }, index: number) => {
+                      const id = item.id;
+                      const root = this.P! as SearchTemplate;
+                      const loc = root.location;
+
+                      const matterMap = root.matter!;
+                      const animalMap = root.animal!;
+
+                      const locMatterId = loc.matter;
+                      const locAnimalId = loc.animal;
+                      const locPrefectureId = loc.prefecture;
+
+                      const matterId = 1 === type ? id : locMatterId;
+                      const animalId = 2 === type ? id : locAnimalId;
+                      const prefectureId = 3 === type ? id : locPrefectureId;
+
+                      let count = 0;
+
+                      const mTarget = matterId ? (2 === matterId ? Object.keys(matterMap).filter((idStr) => {
+                        const item = (this.P! as SearchTemplate)!.matter![idStr] as MatterItem;
+                        return 2 === item.id || !item.search;
+                      }) : [matterId.toString(),]) : [];
+
+                      const aTarget = animalId ? (99 === animalId ? Object.keys(animalMap).filter((idStr) => {
+                        var item = (this.P! as SearchTemplate)!.animal![idStr] as AnimalItem;
+                        return 99 === item.id || !item.search;
+                      }) : [animalId.toString(),]) : [];
+
+                      for (let mIdStr in countInfo) {
+                        if (!matterId || -1 !== mTarget.indexOf(mIdStr)) {
+                          const d1 = countInfo[mIdStr];
+
+                          for (let aIdStr in d1) {
+                            if (!animalId || -1 !== aTarget.indexOf(aIdStr)) {
+                              const d2 = d1[aIdStr];
+
+                              for (let pIdStr in d2) {
+                                if (!prefectureId || pIdStr === prefectureId.toString()) {
+                                  count += d2[pIdStr];
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+
+                      return {
+                        children: {
+                          attribute: {
+                            class: "a2 c25t1a hb2" + (id === (1 === type ? locMatterId : (2 === type ? locAnimalId : locPrefectureId)) ? " c25a1a1s" : "") + (!count ? " c25e1d" : ""),
+                            href: (this.window!.js.get(16) as SearchUrlObject).create({
+                              matter: matterId as SearchMatterId,
+                              animal: animalId as SearchAnimalId,
+                              prefecture: prefectureId as SearchPrefectureId,
+                              page: 1,
+                              sort: loc.sort,
+                            }, root),
+                          },
+                          children: [
+                            item.title,
+                            {
+                              attribute: {
+                                class: "c25t1a1",
+                              },
+                              children: ("" + count).replace(/(\d)(?=(\d{3})+\b)/g, "$1,"),
+                              tagName: "span",
+                            },
+                          ],
+                          tagName: "a",
+                        },
+                        tagName: "li",
+                      };
+                    }),
+                    tagName: "ul",
+                  },
+                  tagName: "div",
+                }),
+                id: "c25f" + type,
+                P: this,
+                target: aE,
+                type: "modal",
+                title: "選択",
+                large: 3 === type,
+              });
+            }
+          })
+          .catch((err) => {
+            if (this.S) {
+              console.error(err);
+              this.window!.throw();
+            }
+          });
+      }, {
+        passive: false,
+      });
+    });
   }
 
   update(object: SearchLocationObject): void {
