@@ -8,6 +8,7 @@ export type CasePhotoThumbnail = string
 export type CasePhotoOriginal = string
 
 export type CaseItemHead = {
+  cover?: string
   location: string
   title?: string
   photos?: CasePhotoEntryList
