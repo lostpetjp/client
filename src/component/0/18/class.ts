@@ -69,10 +69,9 @@ export class SearchItemList extends Component {
     const prefecture = prefectureMap[prefectureId];
     const head = item.head;
 
-    const photos = head.photos;
-    const coverSrc = (photos && photos.length) ? photos[0][0] : null;
-    const matches = coverSrc ? coverSrc.match(/^(m([0-9]+)s([0-9]+)x([0-9]+)z)(\.(jpg|png))$/)! : null;
-    const src = matches ? "/media/" + matches[1] + "-w600a43" + matches[5] : null;
+    const coverSrc = head.cover || null;
+    const matches = coverSrc ? coverSrc.match(/^(m([0-9]+)s([0-9]+)x([0-9]+)z)(\.(jpg|png|mp4|mov))$/)! : null;
+    const src = matches ? "/media/" + matches[1] + "-w600a43" + "." + ("png" === matches[6] ? "png" : "jpg") : null;
 
     const startsAt = new Date(item.starts_at * 1000);
 
