@@ -17,6 +17,7 @@ declare var grecaptcha: Grecaptcha;
 
 export type RecaptchaOptions = InitOptions & {
   element: HTMLDivElement
+  strict?: boolean
 }
 
 type RecaptchaValue = null | string
@@ -58,14 +59,14 @@ export class Recaptcha extends Component {
 
     var scriptE = document.createElement("script");
 
-    this.window!.fetch({
+    (true === options.strict ? Promise.resolve(false) : this.window!.fetch({
       credentials: true,
       method: "GET",
       path: "recaptcha",
-    })
+    }))
       .then((res) => {
         if (this.S) {
-          if (res && res.status) {
+          if (res && (res as { status: boolean }).status) {
             this.confirmed = true;
             this.element.remove();
             this.emit!("ready");
