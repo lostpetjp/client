@@ -24,3 +24,5 @@
 | 19 | Dragger |
 | 20 | Slider |
 | 21 | SliderModal |
+| 22 | Caseカテゴリのテンプレート。 |
+| 23 | Caseカテゴリのコンテンツ。 |
