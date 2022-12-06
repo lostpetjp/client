@@ -48,8 +48,6 @@ export class SearchTemplate extends Component implements Template {
   animal?: AnimalMap
   prefecture?: PrefectureMap
 
-  dateMap: { [key: number]: [number, number,] } = {}
-
   location: SearchLocationObject = {
     matter: 0,
     animal: 0,
@@ -99,7 +97,6 @@ export class SearchTemplate extends Component implements Template {
     });
   }
 
-  // TODO:
   create(): void {
     const win = this.window!;
     const js = win.js;
@@ -185,7 +182,6 @@ export class SearchTemplate extends Component implements Template {
     }) as HTMLDivElement;
   }
 
-  // TODO:
   parse(): void {
     const doc = this.P!;
 
@@ -384,9 +380,7 @@ export class SearchTemplate extends Component implements Template {
   }
 
   attach(): void {
-    const doc = this.window!.document;
-
-    doc.on!(this, "load", () => {
+    this.window!.document.on!(this, "load", () => {
       this.location = (this.window!.js.get(16) as SearchUrlObject).parse(location.pathname, this);
 
       if (1 === this.P!.mode) {
