@@ -12,6 +12,7 @@ import { SearchUrlObject } from "../16/class"
 import { Pager } from "../17/class"
 import { SearchItemList } from "../18/class"
 import { SliderEvent } from "../20/class"
+import { Breadcrumb } from "../24/class"
 import { SearchClear } from "./clear"
 import { SearchCount } from "./count"
 import { SearchFilter } from "./filter"
@@ -38,6 +39,7 @@ export class SearchTemplate extends Component implements Template {
   readonly id: number = 1
   element?: HTMLElement
   content?: Content
+  breadcrumb?: Breadcrumb
 
   readyState: TemplateReadyState = 0
   private article?: HTMLElement
@@ -122,6 +124,10 @@ export class SearchTemplate extends Component implements Template {
       P: this,
     });
 
+    const breadcrumb = this.breadcrumb = new (js.get(24) as typeof Breadcrumb)({
+      P: this,
+    });
+
     const itemList = this.list = new (js.get(18) as typeof SearchItemList)({
       P: this,
       data: {
@@ -150,6 +156,7 @@ export class SearchTemplate extends Component implements Template {
               class: "c9 c25g",
             },
             children: [
+              breadcrumb.element,
               this.heading = element.create({
                 attribute: {
                   class: "c1",
@@ -183,6 +190,9 @@ export class SearchTemplate extends Component implements Template {
   }
 
   parse(): void {
+    const win = this.window!;
+    const js = win.js;
+
     const doc = this.P!;
 
     const mainE = this.element = doc.main!;
@@ -220,11 +230,16 @@ export class SearchTemplate extends Component implements Template {
       P: this,
     });
 
+    this.breadcrumb = new (js.get(24) as typeof Breadcrumb)({
+      element: headerE.getElementsByClassName("c31")[0] as HTMLUListElement,
+      P: this,
+    });
+
     const ulEs = articleE.getElementsByClassName("c27");
     this.topPager = this.createPager("a", ulEs[0] as HTMLUListElement);
     this.bottomPager = this.createPager("b", ulEs[1] as HTMLUListElement);
 
-    this.list = new (this.window!.js.get(18) as typeof SearchItemList)({
+    this.list = new (js.get(18) as typeof SearchItemList)({
       P: this,
       element: articleE.getElementsByClassName("c25f")[0] as HTMLUListElement,
       data: {
@@ -403,6 +418,8 @@ export class SearchTemplate extends Component implements Template {
         this.bottomPager!.update(pageOptions);
 
         this.list!.update(content.items as CaseListItemList);
+
+        this.breadcrumb!.update(content.breadcrumb!);
       }
     });
   }
