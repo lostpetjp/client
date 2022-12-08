@@ -43,7 +43,7 @@ export class Win extends Component {
       this.factory.create(constructor);
     });
 
-    this.css = new CSS({ P: this, default: options.css });
+    this.css = new CSS({ P: this });
     this.me = new Me({ P: this, });
     this.js = new JS({ P: this, });
     this.drawer = new Drawer({ P: this });
@@ -102,10 +102,24 @@ export class Win extends Component {
       removeEventListener("resize", resizeListener);
     });
 
-    this.document.load({
-      data: options.document,
-      type: 3,
-    });
+    // setup css
+    this.css.setup()
+      .then(() => {
+        if (this.S) {
+          this.document.load({
+            data: options.document,
+            type: 3,
+          });
+        }
+      })
+      .catch((err) => {
+        if (this.S) {
+          console.error(err);
+          this.window!.throw();
+        }
+      });
+
+
   }
 
   fetch(options: FetchOptions): Promise<{ [key: string]: any }> {
