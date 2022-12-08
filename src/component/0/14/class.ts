@@ -13,6 +13,7 @@ import { Pager } from "../17/class"
 import { SearchItemList } from "../18/class"
 import { SliderEvent } from "../20/class"
 import { Breadcrumb } from "../24/class"
+import { TopMessage } from "../25/class"
 import { SearchClear } from "./clear"
 import { SearchCount } from "./count"
 import { SearchFilter } from "./filter"
@@ -395,7 +396,32 @@ export class SearchTemplate extends Component implements Template {
   }
 
   attach(): void {
-    this.window!.document.on!(this, "load", () => {
+    const params = new URLSearchParams(location.search);
+
+    const win = this.window!;
+    const js = win.js;
+
+    if ("404" === params.get("status")) {
+      js.load(25)
+        .then((constructors: [typeof TopMessage]) => {
+          if (this.S) {
+            new constructors[0]({
+              content: [
+                "その案件は存在しないか、既に削除されています。",
+              ],
+              P: this,
+            });
+          }
+        })
+        .catch((err) => {
+          if (this.S) {
+            console.error(err);
+            this.window!.throw();
+          }
+        });
+    }
+
+    win.document.on!(this, "load", () => {
       this.location = (this.window!.js.get(16) as SearchUrlObject).parse(location.pathname, this);
 
       if (1 === this.P!.mode) {
