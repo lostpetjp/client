@@ -6,7 +6,7 @@ import { SearchSort } from "./sort"
 import { SearchTab } from "./tab"
 
 export default {
-  js: [16, 17, 18,],
+  js: [16, 17, 18, 24,],
   scope: "lostpetjp",
   type: "class",
   component: [
