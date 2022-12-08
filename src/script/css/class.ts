@@ -58,13 +58,12 @@ type DefaultCSSEntry = {
 export type DefaultCSSEntryList = Array<DefaultCSSEntry>
 
 export type CSSOptions = InitOptions & {
-  default: DefaultCSSEntryList
 };
 
 export class CSS extends Component {
   private promises: PromiseMap = {}
   private caches: CacheMap = {}
-  private element: HTMLStyleElement = document.head.getElementsByTagName("style")[0]
+  private element: HTMLStyleElement = document.createElement("style")
   private entries: IdEntryList = []
 
   constructor(options: CSSOptions) {
@@ -72,31 +71,12 @@ export class CSS extends Component {
       P: options.P,
     });
 
+    document.head.appendChild(this.element);
+
     const changeListener: EventListener = () => {
       this.emit!("resize");
       this.build();
     }
-
-    const cssText = this.element!.textContent;
-
-    options.default.forEach((entry) => {
-      const start = entry.position[0];
-      const end = start + entry.position[1];
-      const id = entry.id;
-      const type = entry.type;
-
-      if (!this.caches[id]) {
-        this.caches[id] = {
-          id: id,
-          styles: [],
-        };
-      }
-
-      this.caches[id].styles.push({
-        text: cssText!.slice(start, end),
-        type: type,
-      });
-    });
 
     [
       "360",
@@ -110,6 +90,70 @@ export class CSS extends Component {
       matchMedia("screen and (min-width:" + size + "px)").addEventListener("change", changeListener, {
         passive: true,
       });
+    });
+  }
+
+  setup(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const bundleLinkE = document.head.querySelector("link[href^='/styles/bundle/']") as HTMLLinkElement;
+
+      const href = bundleLinkE.href;
+      const matches = href.match(/\/([0-9]+)\.css/);
+      const fileName = matches![1];
+
+      Promise.all([
+        fetch(href),
+        this.window!.fetch({
+          credentials: false,
+          method: "GET",
+          body: {
+            id: parseInt(fileName.slice(0, fileName.length - 10), 10), // "11670145236"
+            version: fileName.slice(-10),
+          },
+          path: "css",
+        }),
+      ])
+        .then((responses) => {
+          if (this.S) {
+            return Promise.all([
+              responses[0].text(),
+              responses[1],
+            ]);
+          }
+        })
+        .then((responses) => {
+          if (this.S) {
+            const cssText = responses![0];
+
+            (responses![1] as DefaultCSSEntryList).forEach((entry) => {
+              const start = entry.position[0];
+              const end = start + entry.position[1];
+              const id = entry.id;
+              const type = entry.type;
+
+              if (!this.caches[id]) {
+                this.caches[id] = {
+                  id: id,
+                  styles: [],
+                };
+              }
+
+              this.caches[id].styles.push({
+                text: cssText!.slice(start, end),
+                type: type,
+              });
+            });
+
+            resolve();
+          }
+        })
+        .catch((err) => {
+          if (this.S) {
+            console.error(err);
+            this.window!.throw();
+          }
+        })
+        .finally(reject);
     });
   }
 
