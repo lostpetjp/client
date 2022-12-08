@@ -22,6 +22,7 @@ export type CaseListItem = {
   prefecture: PrefectureId
   created_at: number
   updated_at: number
+  modified_at: number
   starts_at: number
   expires_at: null | number
   head: CaseItemHead
