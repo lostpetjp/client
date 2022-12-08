@@ -608,7 +608,10 @@ export class DocumentItem extends Component {
 
           this.P!.emit!("load");
 
-          if (2 === doc.mode) doc.mode = 1;
+          if (2 === doc.mode) {
+            document.head.querySelector("link[href^='/styles/bundle/']")!.remove();
+            doc.mode = 1;
+          }
         }
       })
       .catch((err) => {
