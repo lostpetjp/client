@@ -26,3 +26,4 @@
 | 21 | SliderModal |
 | 22 | Caseカテゴリのテンプレート。 |
 | 23 | Caseカテゴリのコンテンツ。 |
+| 24 | breadcrumb |
