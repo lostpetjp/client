@@ -74,6 +74,7 @@ export class SearchItemList extends Component {
     const src = matches ? "/media/" + matches[1] + "-w600a43" + "." + ("png" === matches[6] ? "png" : "jpg") : null;
 
     const startsAt = new Date(item.starts_at * 1000);
+    const isNew = ((Date.now() / 1000) - item.modified_at) < 172800;
 
     return element.create({
       attribute: {
@@ -151,7 +152,7 @@ export class SearchItemList extends Component {
           },
           {
             attribute: {
-              class: "o26a2",
+              class: "o26a2" + (isNew ? " o26a2n" : ""),
             },
             children: [
               {
