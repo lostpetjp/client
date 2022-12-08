@@ -25,13 +25,13 @@ export class SearchCount extends Component {
 
     if (options.element) {
       rootE = this.element = options.element as HTMLDivElement;
-      const childNodes = rootE.childNodes;
+      const spanEs = rootE.getElementsByTagName("span");
 
       this.dom = [
-        childNodes[0] as HTMLSpanElement,
+        spanEs[0] as HTMLSpanElement,
       ];
 
-      backE = childNodes[2];
+      backE = spanEs[1];
 
     } else {
       rootE = this.element = element.create({
@@ -83,11 +83,50 @@ export class SearchCount extends Component {
   }
 
   update(object: SearchLocationObject, counts: Array<number>): void {
+    const win = this.window!;
+    const element = win.element;
+
+    const rootE = this.element;
     const doms = this.dom;
     const matterId = object.matter;
     const hasSearch = matterId || object.animal || object.prefecture;
 
-    (doms[0].firstChild as Text).data = ("" + counts[matterId]).replace(/(\d)(?=(\d{3})+\b)/g, "$1,");
+    const root = this.P! as SearchTemplate;
+
+    const prefix = [
+      object.matter ? root.matter![object.matter].title : null,
+      object.animal ? root.animal![object.animal].title : null,
+      object.prefecture ? root.prefecture![object.prefecture].title : null,
+    ].filter((value) => value).map((value) => {
+      return [
+        "「",
+        {
+          children: value,
+          tagName: "b",
+        },
+        "」",
+      ];
+    });
+
+    const prefixNode = prefix.length ? element.create([
+      prefix,
+      "で絞り込み、"
+    ]) : null;
+
+    const children = [];
+
+    if (prefixNode) {
+      children.push(prefixNode);
+    }
+
+    for (let start = false, i = 0, a = rootE.childNodes; a.length > i; i++) {
+      if (a[i] === doms[0]) start = true;
+      if (start) children.push(a[i]);
+    }
+
+    rootE.replaceChildren(...children);
+
+    doms[0].textContent = ("" + counts[matterId]).replace(/(\d)(?=(\d{3})+\b)/g, "$1,");
 
     const backE = doms[1];
     const isContains = backE.parentNode;
