@@ -69,8 +69,7 @@ export class JS extends Component {
                   }
 
                 } else {
-                  throw "error!!!!!!!TODO";
-                  const constructor = component = moduleDefault.constructor;
+                  const constructor = component = moduleDefault;
                   component = this.caches[id] = constructor ? constructor : moduleDefault;
                 }
 
