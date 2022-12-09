@@ -43,8 +43,6 @@ export class SearchTemplate extends Component implements Template {
   breadcrumb?: Breadcrumb
 
   readyState: TemplateReadyState = 0
-  private article?: HTMLElement
-  private header?: HTMLElement
   private heading?: HTMLElement
 
   matter?: MatterMap
@@ -147,12 +145,12 @@ export class SearchTemplate extends Component implements Template {
       attribute: {
         class: "d2a",
       },
-      children: this.article = element.create({
+      children: element.create({
         attribute: {
           class: "c8 d2a1",
         },
         children: [
-          this.header = element.create({
+          {
             attribute: {
               class: "c9 c25g",
             },
@@ -179,7 +177,7 @@ export class SearchTemplate extends Component implements Template {
               count.element,
             ],
             tagName: "header",
-          }) as HTMLDivElement,
+          },
           topPager.element,
           itemList.element,
           bottomPager.element,
@@ -197,8 +195,8 @@ export class SearchTemplate extends Component implements Template {
     const doc = this.P!;
 
     const mainE = this.element = doc.main!;
-    const articleE = this.article = mainE.getElementsByTagName("article")[0] as HTMLElement;
-    const headerE = this.header = articleE.getElementsByTagName("header")[0] as HTMLElement;
+    const articleE = mainE.getElementsByTagName("article")[0] as HTMLElement;
+    const headerE = articleE.getElementsByTagName("header")[0] as HTMLElement;
     const headingE = this.heading = headerE.getElementsByTagName("h1")[0] as HTMLElement;
 
     const wrapperE = headerE.getElementsByClassName("c25w")[0] as HTMLDivElement;
