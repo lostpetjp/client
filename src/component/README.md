@@ -28,3 +28,7 @@
 | 23 | Caseカテゴリのコンテンツ。 |
 | 24 | breadcrumb |
 | 25 | top infomation |
+| 26 | photoSwipe |
+| 27 | photoSwipe-video |
+| 28 | photoSwipe-lightbox |
+| 29 | media viewer |
