@@ -3,6 +3,8 @@ import { SVGCloseElementJSON } from "../../../utils/svg/close";
 
 type Options = InitOptions & {
   content: any
+  expires?: number
+  type: "infomation" | "warning" | "positive" | "negative"
 }
 
 export class TopMessage extends Component {
@@ -16,13 +18,16 @@ export class TopMessage extends Component {
     const win = this.window!;
     const element = win.element;
 
-    win.css.attach(this, [32, 33,], {
+    const type = options.type;
+    const styleId = "warning" === type ? 32 : ("infomation" === type ? 39 : ("positive" === type ? 40 : 41));
+
+    win.css.attach(this, [styleId, 33,], {
       build: true,
     });
 
     const rootE = this.element = element.create({
       attribute: {
-        class: "c32w c33",
+        class: "c" + styleId + " c33 c33p",
       },
       children: [
         {
@@ -38,6 +43,11 @@ export class TopMessage extends Component {
             attribute: {
               height: "12",
               width: "12",
+            },
+            children: {
+              attribute: {
+                fill: "#111",
+              },
             },
           }),
           on: {
@@ -60,6 +70,12 @@ export class TopMessage extends Component {
     }) as HTMLDivElement;
 
     document.body.insertBefore(rootE, document.body.firstChild);
+
+    setTimeout(() => this.element.classList.remove("c33p"), 8);
+
+    if (options.expires) {
+      setTimeout(() => this.destroy!(), options.expires);
+    }
 
     this.on!(this, "destroy", () => {
       this.element.remove();
