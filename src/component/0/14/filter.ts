@@ -3,7 +3,6 @@ import { AnimalItem, SearchAnimalId } from "../../../types/animal";
 import { MatterItem, SearchMatterId } from "../../../types/matter";
 import { PrefectureItem, SearchPrefectureId } from "../../../types/prefecture";
 import { SVGChevronDownElementJSON } from "../../../utils/svg/chevron-down";
-import { SearchUrlObject } from "../16/class";
 import { SearchLocationObject, SearchTemplate } from "./class";
 
 type Options = InitOptions & {
@@ -95,10 +94,9 @@ export class SearchFilter extends Component {
             if (this.S) {
               const win = this.window!;
               const element = win.element;
-              const data = this.P! as SearchTemplate;
 
               const type = this.matter === aE ? 1 : (this.animal === aE ? 2 : 3);
-              const map = 1 === type ? data.matter! : (2 === type ? data.animal! : data.prefecture!);
+              const map = 1 === type ? win.matter! : (2 === type ? win.animal! : win.prefecture!);
 
               win.popup.create({
                 css: [30,],
@@ -119,12 +117,14 @@ export class SearchFilter extends Component {
                       id: number
                       title: string
                     }, index: number) => {
+                      const win = this.window!;
+
                       const id = item.id;
                       const root = this.P! as SearchTemplate;
                       const loc = root.location;
 
-                      const matterMap = root.matter!;
-                      const animalMap = root.animal!;
+                      const matterMap = win.matter!;
+                      const animalMap = win.animal!;
 
                       const locMatterId = loc.matter;
                       const locAnimalId = loc.animal;
@@ -137,12 +137,12 @@ export class SearchFilter extends Component {
                       let count = 0;
 
                       const mTarget = matterId ? (2 === matterId ? Object.keys(matterMap).filter((idStr) => {
-                        const item = (this.P! as SearchTemplate)!.matter![idStr] as MatterItem;
+                        const item = win.matter![idStr] as MatterItem;
                         return 2 === item.id || !item.search;
                       }) : [matterId.toString(),]) : [];
 
                       const aTarget = animalId ? (99 === animalId ? Object.keys(animalMap).filter((idStr) => {
-                        var item = (this.P! as SearchTemplate)!.animal![idStr] as AnimalItem;
+                        var item = win.animal![idStr] as AnimalItem;
                         return 99 === item.id || !item.search;
                       }) : [animalId.toString(),]) : [];
 
@@ -168,13 +168,13 @@ export class SearchFilter extends Component {
                         children: {
                           attribute: {
                             class: "a2 c30a1a hb2" + (id === (1 === type ? locMatterId : (2 === type ? locAnimalId : locPrefectureId)) ? " c25a1a1s" : "") + (!count ? " c25e1d" : ""),
-                            href: (this.window!.js.get(16) as SearchUrlObject).create({
+                            href: root.url.create({
                               matter: matterId as SearchMatterId,
                               animal: animalId as SearchAnimalId,
                               prefecture: prefectureId as SearchPrefectureId,
                               page: 1,
                               sort: loc.sort,
-                            }, root),
+                            }),
                           },
                           children: [
                             item.title,
@@ -217,10 +217,11 @@ export class SearchFilter extends Component {
   }
 
   update(object: SearchLocationObject): void {
-    const root = this.P! as SearchTemplate;
-    const matterMap = root.matter!;
-    const animalMap = root.animal!;
-    const prefectureMap = root.prefecture!;
+    const win = this.window!;
+
+    const matterMap = win.matter!;
+    const animalMap = win.animal!;
+    const prefectureMap = win.prefecture!;
 
     const matterId = object.matter;
     const animalId = object.animal;
