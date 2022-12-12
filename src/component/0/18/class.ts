@@ -5,29 +5,16 @@ import { MatterMap } from "../../../types/matter";
 import { PrefectureMap } from "../../../types/prefecture";
 
 type Options = InitOptions & {
-  data: {
-    matter: MatterMap
-    animal: AnimalMap
-    prefecture: PrefectureMap
-  }
   element?: HTMLUListElement
 }
 
 export class SearchItemList extends Component {
   element: HTMLUListElement
 
-  data: {
-    matter: MatterMap
-    animal: AnimalMap
-    prefecture: PrefectureMap
-  }
-
   constructor(options: Options) {
     super({
       P: options.P,
     });
-
-    this.data = options.data;
 
     const win = this.window!;
     const element = win.element;
@@ -54,10 +41,9 @@ export class SearchItemList extends Component {
     const win = this.window!;
     const element = win.element;
 
-    const data = this.data;
-    const matterMap = data.matter;
-    const animalMap = data.animal;
-    const prefectureMap = data.prefecture;
+    const matterMap = win.matter!;
+    const animalMap = win.animal!;
+    const prefectureMap = win.prefecture!;
 
     const matterId = item.matter;
     const matter = matterMap[matterId];
@@ -181,28 +167,3 @@ export class SearchItemList extends Component {
     }) as HTMLAnchorElement;
   }
 }
-
-
-
-
-
-/*
-<a class="c26i" href="/16909">
-  <article class="c26a">
-    <header class="o26a1">
-     <h2 class="o26a1a">探しています‼︎家猫ですが窓の閉め忘れの際に外に出てしまいました</h2>
-     <span class="o26a1d">しーちゃん</span>
-     <div class="o26a1b l1">迷子</div>
-    <picture class="o26a1c">
-      <source srcset="/media/m135275s1600x1200z-w600a43.jpg.avif" type="image/avif">
-      <source srcset="/media/m135275s1600x1200z-w600a43.jpg.webp" type="image/webp">
-      <img class="c26g" decoding="async" height="450" loading="lazy" src="/media/m135275s1600x1200z-w600a43.jpg" width="600">
-    </picture>
-  </header>
-    <section class="o26a2">
-      <div>神奈川県 逗子市沼間3丁目</div>
-      <time class="o26a2b" datetime="2022-09-14T00:00:00+0900">2022/09/14</time>
-    </section>
-  </article>
-</a>
-*/
