@@ -1,5 +1,4 @@
 import { Component, InitOptions } from "../..";
-import { SearchUrlObject } from "../16/class";
 import { SearchLocationObject, SearchTemplate } from "./class";
 
 type Options = InitOptions & {
@@ -78,11 +77,11 @@ export class SearchTab extends Component {
   update(object: SearchLocationObject, counts: Array<number>): void {
     const root = this.P! as SearchTemplate;
     const doms = this.dom;
-    const searchUrl = this.window!.js.get(16) as SearchUrlObject;
+    const searchUrl = root.url;
 
-    doms[0].href = searchUrl.create({ ...object, page: 1, matter: 0, }, root);
-    doms[1].href = searchUrl.create({ ...object, page: 1, matter: 1, }, root);
-    doms[2].href = searchUrl.create({ ...object, page: 1, matter: 2, }, root);
+    doms[0].href = searchUrl.create({ ...object, page: 1, matter: 0, });
+    doms[1].href = searchUrl.create({ ...object, page: 1, matter: 1, });
+    doms[2].href = searchUrl.create({ ...object, page: 1, matter: 2, });
 
     doms.forEach((aE: HTMLAnchorElement, index: number) => {
       aE.classList[index === (this.P as SearchTemplate)!.location.matter ? "add" : "remove"]("c25e1s");
