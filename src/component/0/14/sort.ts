@@ -1,6 +1,5 @@
 import { Component, InitOptions } from "../..";
 import { SearchSortId } from "../../../types/sort";
-import { SearchUrlObject } from "../16/class";
 import { SearchLocationObject, SearchTemplate } from "./class";
 
 type Options = InitOptions & {
@@ -81,16 +80,18 @@ export class SearchSort extends Component {
     startE.classList[!isNew ? "add" : "remove"]("c25b1s");
     updateE.classList[isNew ? "add" : "remove"]("c25b1s");
 
-    startE.href = (this.window!.js.get(16) as SearchUrlObject).create({
+    const url = (this.P! as SearchTemplate).url;
+
+    startE.href = url.create({
       ...object,
       sort: 0,
       page: 1,
-    }, this.P! as SearchTemplate);
+    });
 
-    updateE.href = (this.window!.js.get(16) as SearchUrlObject).create({
+    updateE.href = url.create({
       ...object,
       sort: 1,
       page: 1,
-    }, this.P! as SearchTemplate);
+    });
   }
 }
