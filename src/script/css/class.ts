@@ -465,9 +465,3 @@ export class CSS extends Component {
     if (requireBuild && (options && true === options.build)) this.build();
   }
 }
-
-// @media screen and (min-width:360px)
-// @media screen and (min-width:480px)
-// @media screen and (min-width:768px)
-// @media screen and (min-width:1024px
-// @media (h
