@@ -8,7 +8,7 @@ import { SearchSortId } from "../../../types/sort"
 import { Content } from "../../content"
 import { Template, TemplateReadyState } from "../../template"
 import { SearchContent } from "../15/class"
-import { SearchUrlObject } from "../16/class"
+import { SearchUrl } from "../16/class"
 import { Pager } from "../17/class"
 import { SearchItemList } from "../18/class"
 import { SliderEvent } from "../20/class"
@@ -45,10 +45,6 @@ export class SearchTemplate extends Component implements Template {
   readyState: TemplateReadyState = 0
   private heading?: HTMLElement
 
-  matter?: MatterMap
-  animal?: AnimalMap
-  prefecture?: PrefectureMap
-
   location: SearchLocationObject = {
     matter: 0,
     animal: 0,
@@ -66,35 +62,15 @@ export class SearchTemplate extends Component implements Template {
   bottomPager?: Pager
   list?: SearchItemList
 
+  url: SearchUrl
+
   constructor(options: Options) {
     super({
       P: options.P,
     });
-  }
 
-  ready(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.window!.fetch({
-        credentials: false,
-        method: "GET",
-        path: "data",
-      })
-        .then((res) => {
-          if (this.S) {
-            this.matter = res.matter as MatterMap;
-            this.animal = res.animal as AnimalMap;
-            this.prefecture = res.prefecture as PrefectureMap;
-
-            resolve();
-          }
-        })
-        .catch((err) => {
-          if (this.S) {
-            console.error(err);
-            this.window!.throw();
-          }
-        })
-        .finally(reject);
+    this.url = new (this.window!.js.get(16) as typeof SearchUrl)({
+      P: this,
     });
   }
 
@@ -130,9 +106,9 @@ export class SearchTemplate extends Component implements Template {
     const itemList = this.list = new (js.get(18) as typeof SearchItemList)({
       P: this,
       data: {
-        matter: this.matter!,
-        animal: this.animal!,
-        prefecture: this.prefecture!,
+        matter: win.matter!,
+        animal: win.animal!,
+        prefecture: win.prefecture!,
       },
     });
 
@@ -241,11 +217,6 @@ export class SearchTemplate extends Component implements Template {
     this.list = new (js.get(18) as typeof SearchItemList)({
       P: this,
       element: articleE.getElementsByClassName("c25f")[0] as HTMLUListElement,
-      data: {
-        matter: this.matter!,
-        animal: this.animal!,
-        prefecture: this.prefecture!,
-      },
     });
   }
 
@@ -272,10 +243,10 @@ export class SearchTemplate extends Component implements Template {
                 credentials: false,
                 method: "GET",
                 body: {
-                  path: (this.window!.js.get(16) as SearchUrlObject).create({
+                  path: this.url.create({
                     ...this.location,
                     page: event.value,
-                  }, this),
+                  }),
                 },
                 path: "date",
               })
@@ -305,10 +276,10 @@ export class SearchTemplate extends Component implements Template {
           const win = this.window!;
 
           win.document.load({
-            pathname: (win.js.get(16) as SearchUrlObject).create({
+            pathname: this.url.create({
               ...this.location,
               page: event.value,
-            }, this),
+            }),
             scroll: "a" === (event.target as Pager).id ? {} : {
               left: 0,
               top: 0,
@@ -326,10 +297,10 @@ export class SearchTemplate extends Component implements Template {
       element: rootE,
       createUrl: (page: number) => {
         return {
-          pathname: (this.window!.js.get(16) as SearchUrlObject).create({
+          pathname: this.url.create({
             ...this.location,
             page: page,
-          }, this),
+          }),
           search: "",
         };
       },
@@ -405,9 +376,10 @@ export class SearchTemplate extends Component implements Template {
           if (this.S) {
             new constructors[0]({
               content: [
-                "その案件は存在しないか、既に削除されています。",
+                "アクセスした案件は存在しないか、既に削除されています。",
               ],
               P: this,
+              type: "warning",
             });
           }
         })
@@ -420,7 +392,7 @@ export class SearchTemplate extends Component implements Template {
     }
 
     win.document.on!(this, "load", () => {
-      this.location = (this.window!.js.get(16) as SearchUrlObject).parse(location.pathname, this);
+      this.location = this.url.parse(location.pathname);
 
       if (1 === this.P!.mode) {
         const content = (this.content as SearchContent)!;
