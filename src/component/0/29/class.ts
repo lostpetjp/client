@@ -81,15 +81,18 @@ export class MediaViewer extends Component {
 
               if (imgE) {
                 const msrc = imgE.currentSrc;
+                let otherSrc = imgE.dataset["original"];
 
-                const matches = msrc.match(/(m([0-9]+)s([0-9]+)x([0-9]+)z)(\-[a-z0-9]+)?(\.(jpg|png))(\.[a-z]+)?$/)!;
-                const otherSrc = "/media/" + matches[1] + "." + ("png" === matches[7] ? "png" : "jpg");
+                const matches = (otherSrc ? otherSrc : msrc).match(/(m([0-9]+)s([0-9]+)x([0-9]+)z)(\-[a-z0-9]+)?(\.(jpg|png))(\.[a-z]+)?$/)!;
+                const height = parseInt(matches[4], 10);
+                const width = parseInt(matches[3], 10);
+                const size = this.window![height > width ? "innerHeight" : "innerWidth"];
 
                 event.itemData = {
                   msrc: "/placeholder.svg",
-                  src: otherSrc + (-1 !== msrc.indexOf(".avif") ? ".avif" : (-1 !== msrc.indexOf(".webp") ? ".webp" : "")),
-                  h: parseInt(matches[4], 10),
-                  w: parseInt(matches[3], 10),
+                  src: "/media/" + matches[1] + (size > 1800 ? "" : ("-" + (height > width ? "h" : "w") + (size > 1500 ? "1500" : (size > 1200 ? "1200" : (size > 900 ? "900" : "600"))))) + "." + ("png" === matches[7] ? "png" : "jpg") + (-1 !== msrc.indexOf(".avif") ? ".avif" : (-1 !== msrc.indexOf(".webp") ? ".webp" : "")),
+                  h: height,
+                  w: width,
                 };
               } else {
                 const videoE = ("VIDEO" === itemE.tagName ? itemE : itemE.getElementsByTagName("video")[0]) as HTMLVideoElement;
@@ -108,7 +111,7 @@ export class MediaViewer extends Component {
                   }
 
                   event.itemData = {
-                    msrc: "/placeholder.svg",
+                    src: "/media/" + matches[1] + ".jpg",
                     type: "video",
                     videoSources: children,
                     height: parseInt(matches[4], 10),
