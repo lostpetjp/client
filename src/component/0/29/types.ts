@@ -10,21 +10,23 @@ type Options = {
 }
 
 export class PhotoSwipeLightbox {
-  constructor(options: Options) {}
+  constructor(options: Options) { }
 
-  init(){}
+  init() { }
 
-  on(name: string, callback: (event: {[key: string]: any}) => void) {}
+  on(name: string, callback: (event: { [key: string]: any }) => void) { }
 
-  loadAndOpen(index: number) {}
+  loadAndOpen(index: number) { }
 
-  destroy() {}
+  destroy() { }
+
+  pswp: boolean = false
 }
 
 export class PhotoSwipe {
-  constructor(options: Options) {}
+  constructor(options: Options) { }
 }
 
 export class PhotoSwipeVideo {
-  constructor(photoSwipe: PhotoSwipe, options: {}) {}
+  constructor(photoSwipe: PhotoSwipe, options: {}) { }
 }
