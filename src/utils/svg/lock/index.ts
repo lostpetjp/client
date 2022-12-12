@@ -1,0 +1,1 @@
+export { SVGLockElementJSON } from "./object"
