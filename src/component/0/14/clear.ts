@@ -3,7 +3,6 @@
 
 import { Component, InitOptions } from "../..";
 import { SVGCloseElementJSON } from "../../../utils/svg/close";
-import { SearchUrlObject } from "../16/class";
 import { SearchLocationObject, SearchTemplate } from "./class";
 
 type Options = InitOptions & {
@@ -76,13 +75,13 @@ export class SearchClear extends Component {
     const hasSearch = object.matter || object.animal || object.prefecture;
 
     if (hasSearch) {
-      this.anchor.href = (this.window!.js.get(16) as SearchUrlObject).create({
+      this.anchor.href = (this.P! as SearchTemplate).url.create({
         ...object,
         matter: 0,
         animal: 0,
         prefecture: 0,
         page: 1,
-      }, this.P! as SearchTemplate);
+      });
     }
 
     if (hasSearch && !element!.parentNode) {
