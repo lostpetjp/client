@@ -47,6 +47,7 @@ export class JS extends Component {
               return Promise.all(promises);
             })
             .then((res) => {
+              const promises = [];
               const moduleDefault = res[0];
 
               if (moduleDefault) {
@@ -66,14 +67,27 @@ export class JS extends Component {
                     });
                   } else if ("function" === type || "object" === type) {
                     component = this.caches[id] = moduleComponent;
+                  } else {
+                    component = 1;
+                  }
+
+                  promises.push(component);
+
+                  if (moduleDefault.run) {
+                    promises.push(moduleDefault.run(this.window, moduleComponent));
                   }
 
                 } else {
                   const constructor = component = moduleDefault;
-                  component = this.caches[id] = constructor ? constructor : moduleDefault;
+                  promises.push(this.caches[id] = constructor ? constructor : moduleDefault);
                 }
+              }
 
-                resolve(component);
+              return Promise.all(promises);
+            })
+            .then((res) => {
+              if (this.S && res) {
+                resolve(res[0]);
               }
             })
             .catch((err) => {
@@ -81,9 +95,8 @@ export class JS extends Component {
                 console.error(err);
                 this.window!.throw();
               }
-
-              reject();
             })
+            .finally(reject);
         }
       });
     }));
