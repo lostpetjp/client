@@ -16,6 +16,8 @@ type Options = InitOptions & {
 export class MediaViewer extends Component {
   items: MediaViewerItemList
   index: number = -1
+  destroyed: boolean = false
+  photoSwipe: null | PhotoSwipeLightbox = null
 
   constructor(options: Options) {
     super({
@@ -55,7 +57,7 @@ export class MediaViewer extends Component {
               build: true,
             });
 
-            const photoSwipe = new constructors[2]({
+            const photoSwipe = this.photoSwipe = new constructors[2]({
               arrowKeys: true,
               clickToCloseNonZoomable: true,
               closeOnVerticalDrag: true,
@@ -139,7 +141,18 @@ export class MediaViewer extends Component {
               };
             });
 
-            this.on!(this, "destroy", () => photoSwipe.destroy());
+            photoSwipe.on("destroy", () => {
+              this.destroyed = true;
+              this.destroy!();
+            });
+
+            this.on!(this, "destroy", () => {
+              if (!this.destroyed) {
+                this.photoSwipe!.destroy();
+              }
+
+              this.window!.css.update();
+            });
 
             photoSwipe.loadAndOpen(this.index);
           }
