@@ -9,6 +9,9 @@ import { ServerOptions } from "../script"
 import { Dialog } from "../dialog"
 import { Popup, PopupLayer } from "../popup"
 import { Drawer } from "../drawer"
+import { MatterMap } from "../../types/matter"
+import { AnimalMap } from "../../types/animal"
+import { PrefectureMap } from "../../types/prefecture"
 
 export type FetchOptions = {
   credentials: boolean
@@ -118,11 +121,9 @@ export class Win extends Component {
           this.window!.throw();
         }
       });
-
-
   }
 
-  fetch(options: FetchOptions): Promise<{ [key: string]: any }> {
+  fetch(options: FetchOptions): Promise<any> {
     let reqBody: any = options.body;
 
     if (reqBody) {
@@ -182,6 +183,11 @@ export class Win extends Component {
         })
         .then((res) => {
           if (this.S) {
+            // version upが発生した場合、次回以降の遷移をHTTP形式にする
+            if ("number" === typeof res.version && res.version > this.version) {
+              this.document!.flag |= 1;
+            }
+
             resolve("undefined" === typeof res.body ? {} : res.body);
           }
         })
@@ -204,6 +210,10 @@ export class Win extends Component {
 
   innerHeight: number = innerHeight
   innerWidth: number = innerWidth
+
+  matter?: MatterMap
+  animal?: AnimalMap
+  prefecture?: PrefectureMap
 
   factory: Factory = new Factory
   version: number = 0
