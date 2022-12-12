@@ -1,8 +1,5 @@
 import { Component, InitOptions } from "../..";
-import { AnimalMap } from "../../../types/animal";
 import { CaseListItem, CaseListItemList } from "../../../types/case";
-import { MatterMap } from "../../../types/matter";
-import { PrefectureMap } from "../../../types/prefecture";
 
 type Options = InitOptions & {
   element?: HTMLUListElement
