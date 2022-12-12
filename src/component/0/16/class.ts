@@ -1,29 +1,14 @@
+import { Component } from "../..";
 import { AnimalItem, AnimalMap, SearchAnimalId } from "../../../types/animal";
 import { MatterItem, MatterMap, SearchMatterId } from "../../../types/matter";
 import { PrefectureItem, PrefectureMap, SearchPrefectureId } from "../../../types/prefecture";
 import { SearchSortId } from "../../../types/sort";
 import { SearchLocationObject } from "../14/class";
 
-export interface SearchUrlObject {
-  parse(pathname: string, data: {
-    matter?: MatterMap
-    animal?: AnimalMap
-    prefecture?: PrefectureMap
-  }): SearchLocationObject
+export class SearchUrl extends Component {
+  parse(pathname: string): SearchLocationObject {
+    const win = this.window!;
 
-  create(options: SearchLocationObject, data: {
-    matter?: MatterMap
-    animal?: AnimalMap
-    prefecture?: PrefectureMap
-  }): string
-}
-
-export const SearchUrl = {
-  parse: (pathname: string, data: {
-    matter?: MatterMap
-    animal?: AnimalMap
-    prefecture?: PrefectureMap
-  }): SearchLocationObject => {
     const object = {
       matter: 0 as SearchMatterId,
       animal: 0 as SearchAnimalId,
@@ -32,9 +17,9 @@ export const SearchUrl = {
       page: 1,
     };
 
-    const matterMap = data.matter!;
-    const animalMap = data.animal!;
-    const prefectureMap = data.prefecture!;
+    const matterMap = win.matter!;
+    const animalMap = win.animal!;
+    const prefectureMap = win.prefecture!;
 
     const find = (pathname: string, map: MatterMap | AnimalMap | PrefectureMap): void | MatterItem | AnimalItem | PrefectureItem => {
       for (let id in map) {
@@ -68,22 +53,20 @@ export const SearchUrl = {
     if (2 > object.page) object.page = 1;
 
     return object;
-  },
+  }
 
-  create: (options: SearchLocationObject, data: {
-    matter?: MatterMap
-    animal?: AnimalMap
-    prefecture?: PrefectureMap
-  }): string => {
+  create(options: SearchLocationObject): string {
+    const win = this.window!;
+
     const matterId = options.matter;
     const animalId = options.animal;
     const prefectureId = options.prefecture;
     const sortId = options.sort;
     const pageId = options.page;
 
-    const matterMap = data.matter!;
-    const animalMap = data.animal!;
-    const prefectureMap = data.prefecture!;
+    const matterMap = win.matter!;
+    const animalMap = win.animal!;
+    const prefectureMap = win.prefecture!;
 
     const find = (id: number, map: MatterMap | AnimalMap | PrefectureMap): void | MatterItem | AnimalItem | PrefectureItem => {
       for (let key in map) {
