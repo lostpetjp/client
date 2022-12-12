@@ -85,6 +85,7 @@ export class DocumentM extends Component {
   mode: Mode = 2
   template?: Template
   private item?: DocumentItem
+  flag: number = 0
 
   static caches: Caches = {}
 
@@ -313,32 +314,39 @@ export class DocumentM extends Component {
   }
 
   load(options: DocumentLoadOptions): void {
+    const hasUpdate = 1 & this.flag;
+
     if (options.pathname || options.search) {
-      history.pushState(null, document.title, "https://" + location.hostname + (options.pathname || "") + (options.search + ""));
+      history[(hasUpdate ? "replace" : "push") + "State"](null, document.title, "https://" + location.hostname + (options.pathname || "") + (options.search + ""));
     }
 
-    const oldDocument = this.item;
+    if (hasUpdate) {
+      location.reload();
 
-    let oldSearch = null;
-    let oldPathname = null;
+    } else {
+      const oldDocument = this.item;
 
-    if (oldDocument) {
-      if (2 === this.mode) return;
+      let oldSearch = null;
+      let oldPathname = null;
 
-      oldSearch = oldDocument.search;
-      oldPathname = oldDocument.pathname;
-    }
+      if (oldDocument) {
+        if (2 === this.mode) return;
 
-    const newSearch = location.search;
-    const newPathname = location.pathname;
+        oldSearch = oldDocument.search;
+        oldPathname = oldDocument.pathname;
+      }
 
-    if (!(oldSearch === newSearch && oldPathname === newPathname)) {
-      if (oldDocument && oldDocument.S) oldDocument.destroy!();
+      const newSearch = location.search;
+      const newPathname = location.pathname;
 
-      this.item = new DocumentItem({
-        P: this,
-        ...options,
-      }, newPathname, newSearch);
+      if (!(oldSearch === newSearch && oldPathname === newPathname)) {
+        if (oldDocument && oldDocument.S) oldDocument.destroy!();
+
+        this.item = new DocumentItem({
+          P: this,
+          ...options,
+        }, newPathname, newSearch);
+      }
     }
   }
 
@@ -479,6 +487,9 @@ export class DocumentItem extends Component {
           if ("function" === typeof newContent!.ready) {
             promises.push(newContent.ready());
           }
+
+          const me = win.me;
+          if (!me.readyState) promises.push(me.update())
 
           return Promise.all(promises);
         }
