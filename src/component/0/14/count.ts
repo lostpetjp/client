@@ -2,7 +2,6 @@ import { Component, InitOptions } from "../.."
 import { SearchAnimalId } from "../../../types/animal"
 import { SearchMatterId } from "../../../types/matter"
 import { SearchPrefectureId } from "../../../types/prefecture"
-import { SearchUrlObject } from "../16/class"
 import { SearchLocationObject, SearchTemplate } from "./class"
 
 type Options = InitOptions & {
@@ -94,9 +93,9 @@ export class SearchCount extends Component {
     const root = this.P! as SearchTemplate;
 
     const prefix = [
-      object.matter ? root.matter![object.matter].title : null,
-      object.animal ? root.animal![object.animal].title : null,
-      object.prefecture ? root.prefecture![object.prefecture].title : null,
+      object.matter ? win.matter![object.matter].title : null,
+      object.animal ? win.animal![object.animal].title : null,
+      object.prefecture ? win.prefecture![object.prefecture].title : null,
     ].filter((value) => value).map((value) => {
       return [
         "「",
@@ -132,13 +131,13 @@ export class SearchCount extends Component {
     const isContains = backE.parentNode;
 
     if (hasSearch && !isContains) {
-      (doms[2] as HTMLAnchorElement).href = (this.window!.js.get(16) as SearchUrlObject).create({
+      (doms[2] as HTMLAnchorElement).href = (this.P! as SearchTemplate).url.create({
         ...object,
         matter: 0 as SearchMatterId,
         animal: 0 as SearchAnimalId,
         prefecture: 0 as SearchPrefectureId,
         page: 1,
-      }, this.P! as SearchTemplate);
+      });
 
       this.element.appendChild(backE);
 
