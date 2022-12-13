@@ -354,69 +354,59 @@ export class SearchTemplate extends Component implements Template {
   }
 
   build(): void {
-    const doc = this.P!;
+    const content = (this.content as SearchContent)!;
+    this.location = this.url.parse(content.pathname);
 
-    if (2 !== doc.mode) {
-      const content = this.content! as SearchContent;
+    if (2 !== this.P!.mode) {
+      this.heading!.textContent = (this.content! as SearchContent).title!;
 
-      (this.heading!.firstChild as Text).data = content.title!;
-    } else {
-    }
-  }
+      this.filter!.update(this.location);
+      this.clear!.update(this.location);
+      this.sort!.update(this.location);
 
-  attach(): void {
-    const params = new URLSearchParams(location.search);
+      this.tab!.update(this.location, content.count!);
+      this.count!.update(this.location, content.count!);
 
-    const win = this.window!;
-    const js = win.js;
+      const pageOptions = {
+        min: 1,
+        max: content.totalPages!,
+        value: this.location.page,
+      };
 
-    if ("404" === params.get("status")) {
-      js.load(25)
-        .then((constructors: [typeof TopMessage]) => {
-          if (this.S) {
-            new constructors[0]({
-              content: [
-                "アクセスした案件は存在しないか、既に削除されています。",
-              ],
-              P: this,
-              type: "warning",
-            });
-          }
-        })
-        .catch((err) => {
-          if (this.S) {
-            console.error(err);
-            this.window!.throw();
-          }
-        });
+      this.topPager!.update(pageOptions);
+      this.bottomPager!.update(pageOptions);
+
+      this.list!.update(content.items as CaseListItemList);
+
+      this.breadcrumb!.update(content.breadcrumb!);
     }
 
-    win.document.on!(this, "load", () => {
-      this.location = this.url.parse(location.pathname);
+    if ("404" === (new URLSearchParams(location.search)).get("status")) {
+      this.window!.document.on!(this, "interactive", () => {
+        const win = this.window!;
+        const js = win.js;
 
-      if (1 === this.P!.mode) {
-        const content = (this.content as SearchContent)!;
-
-        this.filter!.update(this.location);
-        this.clear!.update(this.location);
-        this.sort!.update(this.location);
-
-        this.tab!.update(this.location, content.count!);
-        this.count!.update(this.location, content.count!);
-
-        const pageOptions = {
-          min: 1,
-          max: content.totalPages!,
-          value: this.location.page,
-        };
-
-        this.topPager!.update(pageOptions);
-        this.bottomPager!.update(pageOptions);
-
-        this.list!.update(content.items as CaseListItemList);
-
-        this.breadcrumb!.update(content.breadcrumb!);
-      }
-    });
+        js.load(25)
+          .then((constructors: [typeof TopMessage]) => {
+            if (this.S) {
+              new constructors[0]({
+                content: [
+                  "アクセスした案件は存在しないか、既に削除されています。",
+                ],
+                P: this,
+                type: "warning",
+              });
+            }
+          })
+          .catch((err) => {
+            if (this.S) {
+              console.error(err);
+              this.window!.throw();
+            }
+          });
+      }, {
+        once: true,
+      });
+    }
   }
 }
