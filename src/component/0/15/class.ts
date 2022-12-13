@@ -1,6 +1,6 @@
 import { Component } from "../../../component"
 import { DocumentItem, ContentData } from "../../../script/document"
-import { Content } from "../../content"
+import { Content, ContentOptions } from "../../content"
 import { BreadcrumbItemList } from "../24/class";
 export type SearchContentData = {
   title: string
@@ -20,6 +20,9 @@ export type SearchContentData = {
 export class SearchContent extends Component implements Content {
   P?: DocumentItem
 
+  pathname: string
+  search: string
+
   title?: string
   element?: Node
 
@@ -27,6 +30,15 @@ export class SearchContent extends Component implements Content {
   count?: Array<number>
   totalPages?: number
   breadcrumb?: BreadcrumbItemList
+
+  constructor(options: ContentOptions) {
+    super({
+      P: options.P,
+    });
+
+    this.pathname = options.pathname;
+    this.search = options.search;
+  }
 
   create(data: SearchContentData): void {
     this.title = data.title;
