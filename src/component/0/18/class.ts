@@ -17,7 +17,7 @@ export class SearchItemList extends Component {
     const element = win.element;
 
     if (options.element) {
-      this.element = options.element;
+      win.document.attach(this.element = options.element);
 
     } else {
       this.element = element.create({
