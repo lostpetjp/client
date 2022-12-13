@@ -59,8 +59,9 @@ type DocumentInitOptions = InitOptions & {
  * 1: a要素をclick
  * 2: popstate
  * 3: SSR
+ * 4: reload
  */
-export type LoadType = 1 | 2 | 3;
+export type LoadType = 1 | 2 | 3 | 4;
 
 export type DocumentLoadOptions = {
   data?: DocumentData
@@ -283,7 +284,7 @@ export class DocumentM extends Component {
 
   preload(options: DocumentPreloadOptions): Promise<DocumentData> {
     return new Promise((resolve, reject) => {
-      (options.data ? Promise.resolve(options.data) : this.getInfo(options.pathname!, options.search!, options.cache))
+      (options.data ? Promise.resolve(options.data) : this.getInfo(options.pathname!, /*options.search!,*/ options.cache))
         .then((data) => {
           const win = this.window!;
 
@@ -310,6 +311,19 @@ export class DocumentM extends Component {
           }
         })
         .finally(reject);
+    });
+  }
+
+  reload(options: {
+    scroll?: ScrollToOptions
+  }): void {
+    this.load({
+      pathname: location.pathname,
+      scroll: options?.scroll || {
+        left: scrollX,
+        top: scrollY,
+      },
+      type: 4,
     });
   }
 
@@ -350,10 +364,10 @@ export class DocumentM extends Component {
     }
   }
 
-  getInfo(pathname: string, search: string, cache: boolean): Promise<DocumentData> {
+  getInfo(pathname: string, /*search: string,*/ cache: boolean): Promise<DocumentData> {
     const newPathname = pathname;
-    const newSearch = search;
-    const cacheKey = newPathname + newSearch;
+    // const newSearch = search;
+    const cacheKey = newPathname /*+ newSearch*/;
     const cacheItem = DocumentM.caches[cacheKey];
     const data = (cacheItem && (true === cache || ((cacheItem.created_at + (1000 * 10)) > Date.now())) ? cacheItem.data : null);
     if (data) return Promise.resolve(data);
@@ -362,7 +376,7 @@ export class DocumentM extends Component {
       this.window!.fetch({
         body: {
           pathname: newPathname,
-          search: newSearch,
+          // search: newSearch,
         },
         credentials: false,
         method: "GET",
@@ -479,6 +493,8 @@ export class DocumentItem extends Component {
 
           const newContent: Content = this.content = new (js.get(contentId))({
             P: this,
+            pathname: data.pathname,
+            search: data.search,
           });
 
           newTemplate!.content = newContent;
