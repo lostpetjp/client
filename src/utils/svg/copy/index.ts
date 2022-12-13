@@ -1,0 +1,1 @@
+export { SVGCopyElementJSON } from "./object"
