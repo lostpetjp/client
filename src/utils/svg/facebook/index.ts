@@ -1,0 +1,1 @@
+export { SVGFacebookElementJSON } from "./object"
