@@ -11,8 +11,13 @@ export type CaseItemHead = {
   cover?: string
   location: string
   title?: string
-  photos?: CasePhotoEntryList
   pet?: string
+}
+
+export type CaseItemBody = {
+  description: string
+  photos?: CasePhotoEntryList
+  videos?: CasePhotoEntryList
 }
 
 export type CaseListItem = {
@@ -26,6 +31,10 @@ export type CaseListItem = {
   starts_at: number
   expires_at: null | number
   head: CaseItemHead
+}
+
+export type CaseItem = CaseListItem & {
+  body: CaseItemBody
 }
 
 export type CaseListItemList = Array<CaseListItem>
