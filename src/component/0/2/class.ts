@@ -1,6 +1,6 @@
 import { Component } from "../../../component"
 import { DocumentItem, ContentData } from "../../../script/document"
-import { Content } from "../../content"
+import { Content, ContentOptions } from "../../content"
 import { DocTemplateContent } from "../1/class"
 
 export type DocContentData = {
@@ -15,6 +15,18 @@ export class TermsContent extends Component implements Content, DocTemplateConte
   title?: string
   description?: string
   element?: Node
+
+  pathname: string
+  search: string
+
+  constructor(options: ContentOptions) {
+    super({
+      P: options.P,
+    });
+
+    this.pathname = options.pathname;
+    this.search = options.search;
+  }
 
   create(data: DocContentData): void {
     this.title = data.title;
