@@ -32,3 +32,6 @@
 | 27 | photoSwipe-video |
 | 28 | photoSwipe-lightbox |
 | 29 | media viewer |
+| 30 | comment form |
+| 31 | setup matter, animal, prefecture data |
+| 32 | comment manager |
