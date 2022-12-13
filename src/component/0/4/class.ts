@@ -1,6 +1,6 @@
 import { Component } from "../../../component"
 import { DocumentItem, ContentData } from "../../../script/document"
-import { Content } from "../../content"
+import { Content, ContentOptions } from "../../content"
 import { DocTemplateContent } from "../1/class"
 import { FromValidityManager } from "../13/class";
 
@@ -16,6 +16,18 @@ export class ContactContent extends Component implements Content, DocTemplateCon
   title?: string
   description?: string
   element?: HTMLFormElement
+
+  pathname: string
+  search: string
+
+  constructor(options: ContentOptions) {
+    super({
+      P: options.P,
+    });
+
+    this.pathname = options.pathname;
+    this.search = options.search;
+  }
 
   create(data: DocContentData): void {
     this.title = data.title;
