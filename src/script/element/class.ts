@@ -112,4 +112,64 @@ export class Json2Node {
 
     return element;
   }
+
+  autolink(str: string): any {
+    let check_str = str;
+    let offset = 0;
+    const entries = [];
+    let try_count = 0;
+    let matches;
+
+    while (20 > ++try_count) {
+      if (!(matches = check_str.match(/((https?):\/\/)([a-z0-9-]+\.)?[a-z0-9-]+(\.[a-z]{2,6}){1,3}(\/[a-z0-9.,_\/~#&=;@%+?-]*)?/is)!)) {
+        break;
+      }
+
+      const url = matches[0] as string;
+      const start = str.indexOf(url, offset);
+      const length = url.length;
+
+      offset = start + length;
+      entries.push([start, length, str.slice(start, offset),]);
+
+      check_str = str.slice(offset);
+    }
+
+    const nodes = [];
+    let current = 0;
+
+    entries.forEach((entry) => {
+      const [start, length,] = entry as Array<number>;
+      const url = str.slice(start as number, start + length);
+
+      if (start > current) {
+        nodes.push(str.slice(current, start));
+      }
+
+      const info = new URL(url, "https://" + location.hostname);
+      const isSamesite = info.hostname.indexOf("lostpet.jp") > -1;
+      const suffix = info.pathname + info.search + info.hash;
+
+      nodes.push({
+        attribute: {
+          ...{
+            class: "a1",
+            href: url,
+          },
+          ...(!isSamesite ? {
+            target: "_blank",
+            rel: "external nofollow noopener",
+          } : {})
+        },
+        children: info.protocol + "//" + info.hostname + (suffix.length > 21 ? suffix.slice(0, 20) + "..." : suffix),
+        tagName: "a",
+      });
+
+      current = start + length;
+    });
+
+    nodes.push(str.slice(current));
+
+    return nodes;
+  }
 }
