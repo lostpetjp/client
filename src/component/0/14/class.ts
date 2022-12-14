@@ -105,11 +105,6 @@ export class SearchTemplate extends Component implements Template {
 
     const itemList = this.list = new (js.get(18) as typeof SearchItemList)({
       P: this,
-      data: {
-        matter: win.matter!,
-        animal: win.animal!,
-        prefecture: win.prefecture!,
-      },
     });
 
     itemList.element.classList.add("c25f");
