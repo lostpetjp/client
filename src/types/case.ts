@@ -6,6 +6,8 @@ export type CasePhotoEntryList = Array<CasePhotoEntry>
 export type CasePhotoEntry = [CasePhotoThumbnail, CasePhotoOriginal];
 export type CasePhotoThumbnail = string
 export type CasePhotoOriginal = string
+export type CaseVideo = string
+export type CaseVideoList = Array<CaseVideo>
 
 export type CaseItemHead = {
   cover?: string
@@ -15,9 +17,13 @@ export type CaseItemHead = {
 }
 
 export type CaseItemBody = {
+  author?: string
+  contact?: string
   description: string
   photos?: CasePhotoEntryList
-  videos?: CasePhotoEntryList
+  videos?: CaseVideoList
+  sex?: number
+  age?: string
 }
 
 export type CaseListItem = {
@@ -35,6 +41,8 @@ export type CaseListItem = {
 
 export type CaseItem = CaseListItem & {
   body: CaseItemBody
+  publish: boolean
+  ends_at: number
 }
 
 export type CaseListItemList = Array<CaseListItem>
