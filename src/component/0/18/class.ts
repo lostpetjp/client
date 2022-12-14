@@ -3,6 +3,7 @@ import { CaseListItem, CaseListItemList } from "../../../types/case";
 
 type Options = InitOptions & {
   element?: HTMLUListElement
+  items?: CaseListItemList
 }
 
 export class SearchItemList extends Component {
@@ -26,6 +27,10 @@ export class SearchItemList extends Component {
         },
         tagName: "div",
       }) as HTMLUListElement;
+    }
+
+    if (options.items) {
+      this.update(options.items);
     }
   }
 
