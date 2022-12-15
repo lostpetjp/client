@@ -24,6 +24,7 @@ export class SearchItemList extends Component {
       this.element = element.create({
         attribute: {
           class: "c26",
+          role: "list",
         },
         tagName: "div",
       }) as HTMLUListElement;
@@ -68,6 +69,7 @@ export class SearchItemList extends Component {
       attribute: {
         class: "c26i",
         href: "/" + item.id,
+        role: "listitem",
       },
       children: {
         attribute: {
