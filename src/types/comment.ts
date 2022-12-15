@@ -2,14 +2,17 @@ export type CommentItemHead = {
   author?: string
   owner?: 0 | 1
   trip?: string
+  title?: string
 }
 
 export type CommentItemBody = {
   description: string
+  photos?: Array<string>
+  videos?: Array<string>
 }
 
 export type CommentItem = {
-  body: CommentItemBody
+  body?: CommentItemBody
   case: number
   head: CommentItemHead
   id: number
