@@ -1,7 +1,13 @@
-import { MediaViewer } from "./class"
+import { CommentManager } from "./class"
+import { CommentSingle } from "./comment"
+import { CommentThread } from "./thread"
 
 export default {
   scope: "lostpetjp",
   type: "class",
-  component: MediaViewer,
+  component: [
+    CommentManager,
+    CommentThread,
+    CommentSingle,
+  ],
 }
