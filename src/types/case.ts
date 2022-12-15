@@ -24,6 +24,7 @@ export type CaseItemBody = {
   videos?: CaseVideoList
   sex?: number
   age?: string
+  report?: string
 }
 
 export type CaseListItem = {
@@ -43,6 +44,7 @@ export type CaseItem = CaseListItem & {
   body: CaseItemBody
   publish: boolean
   ends_at: number
+  email: boolean
 }
 
 export type CaseListItemList = Array<CaseListItem>
